@@ -1,0 +1,26 @@
+- Yehia Moldan - show a collection of well known editorial designs
+- Shop (love collection) (love classic collection) (shams collection) (prints) .. all of them must be out-of-stock so they are more on demand kinda of thing
+- Editorial (sindbad collection or rename it to self-mashallah) 
+- Text (a pdf book) - two articles I wrote long time ago
+- Work (tattoos) (logos - pdf files or a direct link to my behance) (jewellery) 
+
+- Contact 
+
+The website colors are black and white
+
+The first landing page is a 3d design rotating in the middle
+
+I dont want any scrolling in Yehia Moldan or editorial
+
+Scrolling for shop ofc , text and work
+
+So since stripe doesnt work in tunis, and there is no real alternative. Is there away that these payments made through the shop section to be digital currency? So it’s a wallet actually that offers payment methods and I will get paid with digital currency in the wallet ((BTCPay Server?)) ((Fiat-to-Crypto Gateway))
+
+Triple-A. a Visa partner, the trust level for your customers is high. You get a clean checkout UI, and the money lands in your wallet as a stablecoin, avoiding the volatility of Bitcoin.
+
+
+here is a simple website he created for himself: http://yehiamoldan.net/
+
+
+Reference / inspiration websites: https://mothannahussein.com/ (structure), https://shabab.world/ (design and 3d logo motion) 
+Clients instagram: https://www.instagram.com/yehiamoldan/
