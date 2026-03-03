@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Inquiry Success | Yehia Moldan" description="Inquiry confirmation page." noIndex>
+  <main class="grid min-h-screen place-items-center px-4 py-10">
+    <section class="w-full max-w-container-sm space-y-5 border border-hairline bg-bg p-8 text-center md:p-10">
+      <p class="text-xs uppercase tracking-[0.1em] text-muted">Inquiry</p>
+      <h1 class="font-display text-3xl leading-tight md:text-5xl">Message Sent</h1>
+      <p class="font-body text-sm leading-relaxed text-muted md:text-base">
+        Your inquiry was recorded. You can return to the shop, work, or text sections.
+      </p>
+
+      <div class="flex flex-wrap items-center justify-center gap-3 text-xs uppercase tracking-[0.08em]">
+        <a
+          class="inline-flex items-center border border-fg px-3 py-2 transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
+          href="/shop"
+        >
+          Back to Shop
+        </a>
+        <a
+          class="inline-flex items-center border border-hairline px-3 py-2 transition-colors duration-fast ease-standard hover:border-fg"
+          href="/"
+        >
+          Home
+        </a>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

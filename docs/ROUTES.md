@@ -11,7 +11,7 @@
 |---|---|---|---|---|---|
 | `/` | Yehia Moldan landing + rotating 3D logo | No-scroll | Static | Local content + assets | Full viewport stage |
 | `/editorial` | Editorial index / chapter chooser | No-scroll | Static | `src/content/editorial` | Frame navigation |
-| `/editorial/[chapter]` | Single editorial chapter | No-scroll | Static | `src/content/editorial` | URL-addressable slides |
+| `/editorial/[piece]/[chapter]` | Single editorial chapter | No-scroll | Static | `src/content/editorial` | URL-addressable chapter frames |
 | `/shop` | Collection overview (all out-of-stock) | Scroll | Static | `src/content/shop` | Inquiry CTA only |
 | `/shop/[collection]` | Collection detail | Scroll | Static | `src/content/shop` | No checkout widget in MVP |
 | `/text` | Text/article index | Scroll | Static | `src/content/text` | Includes PDF links |
@@ -28,7 +28,7 @@
 - Applies only to:
   - `/`
   - `/editorial`
-  - `/editorial/[chapter]`
+  - `/editorial/[piece]/[chapter]`
 - Content lives inside full-viewport frames.
 - Navigation controls:
   - Previous / Next buttons

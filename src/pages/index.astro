@@ -1,0 +1,20 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HomeLogoScene from '../components/HomeLogoScene.astro';
+---
+
+<BaseLayout title="Yehia Moldan" noScroll>
+  <main class="grid h-screen grid-rows-[1fr_auto] overflow-hidden px-6 pb-8 pt-6 md:px-10 md:pt-8">
+    <section class="flex items-center justify-center">
+      <HomeLogoScene />
+    </section>
+
+    <section class="mx-auto max-w-container-sm space-y-3 text-center">
+      <p class="text-xs uppercase tracking-[0.1em] text-muted">Yehia Moldan</p>
+      <h1 class="font-display text-3xl leading-tight md:text-5xl">Mashallah AVAV</h1>
+      <p class="font-body text-sm text-muted md:text-base">
+        Rotating signature mark for the monochrome portfolio storefront.
+      </p>
+    </section>
+  </main>
+</BaseLayout>

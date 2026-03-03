@@ -1,0 +1,37 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Contact | Yehia Moldan" description="Contact and inquiry route for Yehia Moldan.">
+  <main class="min-h-screen px-4 pb-10 pt-6 md:px-8 md:pb-12 md:pt-8">
+    <section class="mx-auto w-full max-w-container-sm space-y-6 border border-hairline bg-bg p-6 md:p-8">
+      <header class="space-y-3 border-b border-hairline pb-4">
+        <p class="text-xs uppercase tracking-[0.1em] text-muted">Contact</p>
+        <h1 class="font-display text-3xl leading-tight md:text-5xl">Inquiry</h1>
+        <p class="font-body text-sm leading-relaxed text-muted md:text-base">
+          Use email or Instagram DM for inquiry-only requests.
+        </p>
+      </header>
+
+      <div class="space-y-3 text-sm md:text-base">
+        <p>
+          Email:
+          <a class="underline underline-offset-4" href="mailto:hello@example.com">hello@example.com</a>
+        </p>
+        <p>
+          Instagram:
+          <a class="underline underline-offset-4" href="https://instagram.com/your_instagram_handle" rel="noreferrer" target="_blank">
+            @your_instagram_handle
+          </a>
+        </p>
+      </div>
+
+      <a
+        class="inline-flex items-center border border-fg px-3 py-2 text-xs uppercase tracking-[0.08em] transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
+        href="/inquiry/success"
+      >
+        View Inquiry Success State
+      </a>
+    </section>
+  </main>
+</BaseLayout>

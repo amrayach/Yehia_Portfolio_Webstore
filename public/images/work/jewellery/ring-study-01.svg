@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1200 900" role="img" aria-labelledby="title desc">
+  <title id="title">Ring Study 01</title>
+  <desc id="desc">Monochrome placeholder artwork for jewellery gallery item.</desc>
+  <rect width="1200" height="900" fill="#f2f2f2" />
+  <circle cx="600" cy="430" r="210" fill="none" stroke="#0a0a0a" stroke-width="14" />
+  <circle cx="600" cy="430" r="150" fill="none" stroke="#666666" stroke-width="4" stroke-dasharray="14 18" />
+  <text x="70" y="840" fill="#0a0a0a" font-family="Instrument Sans, Arial, sans-serif" font-size="36">Jewellery / Ring Study 01</text>
+</svg>

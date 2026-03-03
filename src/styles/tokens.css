@@ -1,0 +1,26 @@
+:root {
+  --color-bg: #ffffff;
+  --color-fg: #0a0a0a;
+  --color-muted: #666666;
+  --color-soft: #f2f2f2;
+  --color-hairline: #d9d9d9;
+
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 24px;
+  --space-6: 32px;
+  --space-7: 48px;
+  --space-8: 64px;
+
+  --container-sm: 760px;
+  --container-md: 1040px;
+  --container-lg: 1280px;
+
+  --radius-sm: 4px;
+  --radius-md: 10px;
+  --duration-fast: 140ms;
+  --duration-base: 220ms;
+  --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
+}

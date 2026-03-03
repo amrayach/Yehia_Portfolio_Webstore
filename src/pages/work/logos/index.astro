@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getLogoItems } from '../../../lib/work';
+
+const logos = await getLogoItems();
+---
+
+<BaseLayout title="Logos | Work">
+  <main class="min-h-screen px-4 pb-10 pt-6 md:px-8 md:pb-12 md:pt-8">
+    <section class="mx-auto w-full max-w-container-lg space-y-6">
+      <header class="space-y-3 border-b border-hairline pb-4">
+        <p class="text-xs uppercase tracking-[0.1em] text-muted">Work / Logos</p>
+        <h1 class="font-display text-3xl leading-tight md:text-5xl">Logo PDF Sheets</h1>
+        <a
+          class="inline-flex items-center gap-2 border border-hairline px-3 py-2 text-xs uppercase tracking-[0.08em] transition-colors duration-fast ease-standard hover:border-fg"
+          href="/work"
+        >
+          Back to Work
+        </a>
+      </header>
+
+      {
+        logos.length === 0 ? (
+          <article class="border border-hairline bg-bg p-6 text-sm text-muted md:text-base">No logo PDFs published.</article>
+        ) : (
+          <div class="grid gap-px border border-hairline bg-hairline md:grid-cols-2">
+            {logos.map((logo) => (
+              <article class="flex h-full flex-col justify-between bg-bg p-5 md:p-6">
+                <div class="space-y-3">
+                  <p class="text-xs uppercase tracking-[0.08em] text-muted">PDF Entry</p>
+                  <h2 class="font-display text-2xl leading-tight md:text-3xl">{logo.entry.data.title}</h2>
+                  {logo.entry.data.summary && <p class="font-body text-sm leading-relaxed text-muted md:text-base">{logo.entry.data.summary}</p>}
+                </div>
+
+                <div class="mt-8 border-t border-hairline pt-4">
+                  <a
+                    class="inline-flex items-center gap-2 border border-fg px-3 py-2 text-xs uppercase tracking-[0.08em] transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
+                    href={logo.url}
+                  >
+                    Open PDF
+                  </a>
+                </div>
+              </article>
+            ))}
+          </div>
+        )
+      }
+    </section>
+  </main>
+</BaseLayout>

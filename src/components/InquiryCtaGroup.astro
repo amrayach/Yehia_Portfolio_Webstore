@@ -1,0 +1,25 @@
+---
+interface Props {
+  instagramUrl: string;
+  emailUrl: string;
+}
+
+const { instagramUrl, emailUrl } = Astro.props;
+---
+
+<div class="flex flex-wrap items-center gap-2 pt-4">
+  <a
+    class="inline-flex items-center border border-fg bg-fg px-3 py-2 text-xs font-medium uppercase tracking-[0.08em] text-bg transition-colors duration-fast ease-standard hover:bg-bg hover:text-fg"
+    href={instagramUrl}
+    target="_blank"
+    rel="noreferrer"
+  >
+    DM to inquire
+  </a>
+  <a
+    class="inline-flex items-center border border-hairline px-3 py-2 text-xs font-medium uppercase tracking-[0.08em] text-fg transition-colors duration-fast ease-standard hover:border-fg"
+    href={emailUrl}
+  >
+    Email fallback
+  </a>
+</div>

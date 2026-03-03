@@ -1,0 +1,61 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getTextArticles } from '../lib/text';
+
+const articles = (await getTextArticles()).slice(0, 2);
+const pdfUrl = '/pdfs/text-placeholder.pdf';
+---
+
+<BaseLayout title="Text | Yehia Moldan">
+  <main class="min-h-screen px-4 pb-10 pt-6 md:px-8 md:pt-8">
+    <section class="mx-auto w-full max-w-container-md space-y-6">
+      <header class="space-y-2 border-b border-hairline pb-4">
+        <p class="text-xs uppercase tracking-[0.1em] text-muted">Text</p>
+        <h1 class="font-display text-3xl leading-tight md:text-5xl">Articles and Notes</h1>
+      </header>
+
+      <div class="grid gap-px border border-hairline bg-hairline md:grid-cols-2">
+        {
+          articles.map((article) => (
+            <article class="flex h-full flex-col justify-between bg-bg p-5 md:p-6">
+              <div class="space-y-3">
+                <p class="text-xs uppercase tracking-[0.08em] text-muted">Article</p>
+                <h2 class="font-display text-2xl leading-tight md:text-3xl">{article.entry.data.title}</h2>
+                <p class="font-body text-sm leading-relaxed text-muted md:text-base">{article.entry.data.excerpt}</p>
+              </div>
+
+              <div class="mt-8 border-t border-hairline pt-4">
+                <a
+                  class="inline-flex items-center gap-2 border border-fg px-3 py-2 text-xs uppercase tracking-[0.08em] transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
+                  href={article.url}
+                >
+                  Read Article
+                </a>
+              </div>
+            </article>
+          ))
+        }
+
+        <article class="flex h-full flex-col justify-between bg-bg p-5 md:p-6">
+          <div class="space-y-3">
+            <p class="text-xs uppercase tracking-[0.08em] text-muted">PDF</p>
+            <h2 class="font-display text-2xl leading-tight md:text-3xl">Text Companion Download</h2>
+            <p class="font-body text-sm leading-relaxed text-muted md:text-base">
+              Download the static text companion document.
+            </p>
+          </div>
+
+          <div class="mt-8 border-t border-hairline pt-4">
+            <a
+              class="inline-flex items-center gap-2 border border-fg px-3 py-2 text-xs uppercase tracking-[0.08em] transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
+              href={pdfUrl}
+              download
+            >
+              Download PDF
+            </a>
+          </div>
+        </article>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

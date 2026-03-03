@@ -1,0 +1,63 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getWorkItemsByCategory } from '../lib/work';
+
+const tattoosCount = (await getWorkItemsByCategory('tattoos')).length;
+const jewelleryCount = (await getWorkItemsByCategory('jewellery')).length;
+const logosCount = (await getWorkItemsByCategory('logos')).length;
+
+const categories = [
+  {
+    label: 'Tattoos',
+    href: '/work/tattoos',
+    description: 'Static gallery of tattoo studies and line explorations.',
+    count: tattoosCount,
+  },
+  {
+    label: 'Jewellery',
+    href: '/work/jewellery',
+    description: 'Static gallery of jewellery sketches and object concepts.',
+    count: jewelleryCount,
+  },
+  {
+    label: 'Logos',
+    href: '/work/logos',
+    description: 'Static PDF sheets for logo direction and monogram studies.',
+    count: logosCount,
+  },
+];
+---
+
+<BaseLayout title="Work | Yehia Moldan">
+  <main class="min-h-screen px-4 pb-10 pt-6 md:px-8 md:pb-12 md:pt-8">
+    <section class="mx-auto w-full max-w-container-lg space-y-6">
+      <header class="space-y-2 border-b border-hairline pb-4">
+        <p class="text-xs uppercase tracking-[0.1em] text-muted">Work</p>
+        <h1 class="font-display text-3xl leading-tight md:text-5xl">Categories</h1>
+      </header>
+
+      <div class="grid gap-px border border-hairline bg-hairline md:grid-cols-3">
+        {
+          categories.map((category) => (
+            <article class="flex h-full flex-col justify-between bg-bg p-5 md:p-6">
+              <div class="space-y-3">
+                <p class="text-xs uppercase tracking-[0.08em] text-muted">{category.count} items</p>
+                <h2 class="font-display text-2xl leading-tight md:text-3xl">{category.label}</h2>
+                <p class="font-body text-sm leading-relaxed text-muted md:text-base">{category.description}</p>
+              </div>
+
+              <div class="mt-8 border-t border-hairline pt-4">
+                <a
+                  class="inline-flex items-center gap-2 border border-fg px-3 py-2 text-xs uppercase tracking-[0.08em] transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
+                  href={category.href}
+                >
+                  Open Category
+                </a>
+              </div>
+            </article>
+          ))
+        }
+      </div>
+    </section>
+  </main>
+</BaseLayout>

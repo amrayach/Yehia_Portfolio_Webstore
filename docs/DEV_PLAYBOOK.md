@@ -53,7 +53,9 @@ Examples:
 - Production branch: `main`.
 - Build command: `pnpm build`
 - Output directory: `dist`
-- Node version: use active LTS in Pages settings.
+- Node version: use active LTS in Pages settings (assume LTS baseline; set `NODE_VERSION` if your Pages project is pinned).
+- Astro deployment mode is static-first: `output: static`, `outDir: dist`, `@astrojs/cloudflare` adapter.
+- Set `PUBLIC_SITE_URL` in Pages environment variables so canonical, OpenGraph, and sitemap URLs resolve to the production domain.
 - Keep environment vars minimal for MVP (inquiry-only architecture).
 
 ## Pre-Merge Checklist

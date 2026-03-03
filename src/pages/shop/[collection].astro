@@ -1,0 +1,75 @@
+---
+import InquiryCtaGroup from '../../components/InquiryCtaGroup.astro';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getShopCollections, getShopItems, type ShopCollection } from '../../lib/shop';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const collections = await getShopCollections();
+
+  return collections.map((collection) => ({
+    params: {
+      collection: collection.slug,
+    },
+    props: {
+      collection,
+    },
+  }));
+}
+
+interface Props {
+  collection: ShopCollection;
+}
+
+const { collection } = Astro.props as Props;
+const items = getShopItems(collection);
+---
+
+<BaseLayout title={`${collection.entry.data.title} | Shop`} description="Inquiry-only collection detail.">
+  <main class="min-h-screen px-4 pb-12 pt-6 md:px-8 md:pt-8">
+    <section class="mx-auto w-full max-w-container-lg space-y-6">
+      <header class="space-y-3 border-b border-hairline pb-4">
+        <p class="text-xs uppercase tracking-[0.1em] text-muted">Shop / {collection.entry.data.title}</p>
+        <h1 class="font-display text-3xl leading-tight md:text-5xl">{collection.entry.data.title}</h1>
+        <p class="max-w-[64ch] font-body text-sm leading-relaxed text-muted md:text-base">{collection.entry.data.description}</p>
+        <a
+          class="inline-flex items-center border border-hairline px-3 py-2 text-xs uppercase tracking-[0.08em] transition-colors duration-fast ease-standard hover:border-fg"
+          href="/shop"
+        >
+          Back to Shop
+        </a>
+      </header>
+
+      {
+        items.length === 0 ? (
+          <article class="border border-hairline bg-bg p-6 text-sm text-muted md:text-base">No items available in this collection.</article>
+        ) : (
+          <div class="grid gap-px border border-hairline bg-hairline md:grid-cols-2 lg:grid-cols-3">
+            {items.map((item) => (
+              <article class="flex h-full flex-col justify-between bg-bg p-4 md:p-5">
+                <div class="space-y-4">
+                  <img
+                    src={item.image}
+                    alt={item.title}
+                    loading="lazy"
+                    class="aspect-square w-full border border-hairline object-cover"
+                  />
+                  <div class="space-y-2">
+                    <p class="inline-flex border border-fg bg-fg px-2 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.09em] text-bg">
+                      {item.statusLabel}
+                    </p>
+                    <h2 class="font-display text-xl leading-tight md:text-2xl">{item.title}</h2>
+                    <p class="font-body text-sm leading-relaxed text-muted">Inquiry only. No payment or checkout flow.</p>
+                  </div>
+                </div>
+
+                <InquiryCtaGroup instagramUrl={item.instagramInquiryUrl} emailUrl={item.emailInquiryUrl} />
+              </article>
+            ))}
+          </div>
+        )
+      }
+    </section>
+  </main>
+</BaseLayout>

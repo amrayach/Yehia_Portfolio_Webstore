@@ -1,0 +1,242 @@
+---
+const modelPath = '/assets/mashallah_avav_logo.glb';
+---
+
+<section class="logo-scene-wrapper" aria-label="Rotating Mashallah AVAV logo">
+  <div class="logo-scene" data-home-logo-scene data-model-path={modelPath}>
+    <canvas class="logo-canvas" aria-hidden="true"></canvas>
+    <p class="logo-fallback" data-logo-fallback hidden>
+      3D logo is temporarily unavailable.
+    </p>
+  </div>
+</section>
+
+<style>
+  .logo-scene-wrapper {
+    width: 100%;
+    display: flex;
+    justify-content: center;
+  }
+
+  .logo-scene {
+    position: relative;
+    width: min(78vw, 540px);
+    aspect-ratio: 1 / 1;
+  }
+
+  .logo-canvas {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .logo-fallback {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    margin: 0;
+    text-align: center;
+    font-family: 'Instrument Sans', 'Helvetica Neue', Arial, sans-serif;
+    font-size: 0.95rem;
+    color: var(--color-muted);
+  }
+
+  .logo-fallback[hidden] {
+    display: none !important;
+  }
+
+  @media (max-width: 768px) {
+    .logo-scene {
+      width: min(86vw, 400px);
+    }
+  }
+</style>
+
+<script type="module" is:inline>
+  import * as THREE from '/vendor/three/three.module.js';
+  import { GLTFLoader } from '/vendor/three/loaders/GLTFLoader.js';
+  import { DRACOLoader } from '/vendor/three/loaders/DRACOLoader.js';
+
+  const root = document.querySelector('[data-home-logo-scene]');
+  if (root instanceof HTMLElement) {
+    void initScene(root);
+  }
+
+  async function initScene(root) {
+    const canvas = root.querySelector('.logo-canvas');
+    const fallback = root.querySelector('[data-logo-fallback]');
+
+    if (!(canvas instanceof HTMLCanvasElement)) {
+      return;
+    }
+
+    if (!('WebGLRenderingContext' in window)) {
+      showFallback(fallback);
+      return;
+    }
+
+    let cleanup = () => undefined;
+    try {
+      const scene = new THREE.Scene();
+      const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
+      camera.position.set(0, 0, 5.2);
+
+      const renderer = new THREE.WebGLRenderer({
+        canvas,
+        antialias: true,
+        alpha: true,
+        powerPreference: 'high-performance',
+      });
+      renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+
+      scene.add(new THREE.AmbientLight(0xffffff, 0.95));
+
+      const keyLight = new THREE.DirectionalLight(0xffffff, 1.25);
+      keyLight.position.set(2.2, 2.8, 3.4);
+      scene.add(keyLight);
+
+      const fillLight = new THREE.DirectionalLight(0xffffff, 0.45);
+      fillLight.position.set(-2.4, -1.8, 2.8);
+      scene.add(fillLight);
+
+      const holder = new THREE.Group();
+      scene.add(holder);
+
+      const dracoLoader = new DRACOLoader();
+      dracoLoader.setDecoderPath('/vendor/three/draco/');
+
+      const loader = new GLTFLoader();
+      loader.setDRACOLoader(dracoLoader);
+      const path = root.dataset.modelPath || '/assets/mashallah_avav_logo.glb';
+      const gltf = await loader.loadAsync(path);
+      const model = gltf.scene || gltf.scenes?.[0];
+      if (!model) {
+        throw new Error('GLB model has no scene node.');
+      }
+
+      holder.add(model);
+
+      const bounds = new THREE.Box3().setFromObject(model);
+      const center = bounds.getCenter(new THREE.Vector3());
+      const size = bounds.getSize(new THREE.Vector3());
+      model.position.sub(center);
+
+      const maxAxis = Math.max(size.x, size.y, size.z) || 1;
+      const normalizedScale = 2.45 / maxAxis;
+      model.scale.setScalar(normalizedScale);
+
+      const mediaQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+      let allowMotion = !mediaQuery.matches;
+      let targetTiltX = 0;
+      let targetTiltZ = 0;
+
+      const onMotionPrefChange = (event) => {
+        allowMotion = !event.matches;
+        if (!allowMotion) {
+          targetTiltX = 0;
+          targetTiltZ = 0;
+        }
+      };
+
+      if (typeof mediaQuery.addEventListener === 'function') {
+        mediaQuery.addEventListener('change', onMotionPrefChange);
+      }
+
+      const onPointerMove = (event) => {
+        if (!allowMotion) return;
+        const rect = root.getBoundingClientRect();
+        if (!rect.width || !rect.height) return;
+
+        const nx = (event.clientX - rect.left) / rect.width;
+        const ny = (event.clientY - rect.top) / rect.height;
+        const x = nx * 2 - 1;
+        const y = ny * 2 - 1;
+
+        targetTiltX = THREE.MathUtils.clamp(-y * 0.12, -0.16, 0.16);
+        targetTiltZ = THREE.MathUtils.clamp(x * 0.16, -0.22, 0.22);
+      };
+
+      const onPointerLeave = () => {
+        targetTiltX = 0;
+        targetTiltZ = 0;
+      };
+
+      root.addEventListener('pointermove', onPointerMove);
+      root.addEventListener('pointerleave', onPointerLeave);
+
+      const resize = () => {
+        const rect = root.getBoundingClientRect();
+        const width = Math.max(1, Math.floor(rect.width));
+        const height = Math.max(1, Math.floor(rect.height));
+
+        renderer.setPixelRatio(Math.min(window.devicePixelRatio || 1, 2));
+        renderer.setSize(width, height, false);
+        camera.aspect = width / height;
+        camera.updateProjectionMatrix();
+      };
+
+      const resizeObserver = new ResizeObserver(resize);
+      resizeObserver.observe(root);
+      resize();
+
+      const clock = new THREE.Clock();
+      let rafId = 0;
+      let stopped = false;
+
+      const renderFrame = () => {
+        if (stopped) return;
+        const delta = clock.getDelta();
+
+        if (allowMotion) {
+          holder.rotation.y += delta * 0.5;
+        }
+
+        holder.rotation.x = THREE.MathUtils.lerp(holder.rotation.x, targetTiltX, 0.08);
+        holder.rotation.z = THREE.MathUtils.lerp(holder.rotation.z, targetTiltZ, 0.08);
+
+        renderer.render(scene, camera);
+        rafId = requestAnimationFrame(renderFrame);
+      };
+      renderFrame();
+
+      cleanup = () => {
+        if (stopped) return;
+        stopped = true;
+        cancelAnimationFrame(rafId);
+        resizeObserver.disconnect();
+        root.removeEventListener('pointermove', onPointerMove);
+        root.removeEventListener('pointerleave', onPointerLeave);
+
+        if (typeof mediaQuery.removeEventListener === 'function') {
+          mediaQuery.removeEventListener('change', onMotionPrefChange);
+        }
+
+        scene.traverse((node) => {
+          if (node instanceof THREE.Mesh) {
+            node.geometry?.dispose();
+            if (Array.isArray(node.material)) {
+              node.material.forEach((material) => material?.dispose?.());
+            } else {
+              node.material?.dispose?.();
+            }
+          }
+        });
+        dracoLoader.dispose();
+        renderer.dispose();
+      };
+
+      window.addEventListener('pagehide', cleanup, { once: true });
+      document.addEventListener('astro:before-swap', cleanup, { once: true });
+    } catch (error) {
+      cleanup();
+      showFallback(fallback);
+      console.error('[HomeLogoScene] Failed to initialize 3D logo scene.', error);
+    }
+  }
+
+  function showFallback(fallback) {
+    if (!(fallback instanceof HTMLElement)) return;
+    fallback.hidden = false;
+  }
+</script>

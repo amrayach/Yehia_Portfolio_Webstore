@@ -10,8 +10,10 @@
 src/
   content/
     editorial/
-      self-mashallah-01.md
-      self-mashallah-02.md
+      self-mashallah/
+        01-origin.mdx
+        02-ritual.mdx
+        03-echo.mdx
     text/
       article-title.md
     shop/
@@ -37,12 +39,11 @@ public/
 
 ### `EditorialChapter`
 ```yaml
+pieceTitle: string           # required
+pieceSummary: string         # required
 title: string                # required
-slug: string                 # required, kebab-case
 chapterNumber: number        # required
 summary: string              # required
-coverImage: string           # required, /images/editorial/*
-frameImages: string[]        # optional
 published: boolean           # required
 publishDate: YYYY-MM-DD      # optional
 ```
@@ -97,9 +98,9 @@ createdAt: ISO datetime
 ## How To Add Content
 
 ### Add an editorial chapter
-1. Create `src/content/editorial/<slug>.md`.
+1. Create `src/content/editorial/<piece>/<chapter>.mdx`.
 2. Fill `EditorialChapter` frontmatter.
-3. Add assets under `public/images/editorial/`.
+3. Keep `pieceTitle` and `pieceSummary` consistent across chapters in the same piece.
 4. Ensure `published: true` when ready.
 
 ### Add a text article

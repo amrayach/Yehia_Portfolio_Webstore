@@ -5,6 +5,8 @@ node_modules/
 dist/
 build/
 .turbo/
+.astro/
+.wrangler/
 
 # environment files
 .env
@@ -23,3 +25,6 @@ yarn-error.log*
 Thumbs.db
 .idea/
 .vscode/
+
+# DCC backup artifacts
+*.blend1

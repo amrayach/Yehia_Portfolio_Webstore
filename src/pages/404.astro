@@ -1,0 +1,30 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="404" description="The page you requested could not be found." noIndex>
+  <main class="grid min-h-screen place-items-center px-4 py-10">
+    <section class="w-full max-w-container-sm space-y-6 border border-hairline bg-bg p-8 text-center md:p-10">
+      <p class="text-xs uppercase tracking-[0.1em] text-muted">404</p>
+      <h1 class="font-display text-3xl leading-tight md:text-5xl">Page Not Found</h1>
+      <p class="font-body text-sm leading-relaxed text-muted md:text-base">
+        The requested route does not exist in this release.
+      </p>
+
+      <div class="flex flex-wrap items-center justify-center gap-3 text-xs uppercase tracking-[0.08em]">
+        <a
+          class="inline-flex items-center border border-fg px-3 py-2 transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
+          href="/"
+        >
+          Go Home
+        </a>
+        <a
+          class="inline-flex items-center border border-hairline px-3 py-2 transition-colors duration-fast ease-standard hover:border-fg"
+          href="/work"
+        >
+          Explore Work
+        </a>
+      </div>
+    </section>
+  </main>
+</BaseLayout>

@@ -1,0 +1,210 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getEditorialChapters, type EditorialChapter } from '../../../lib/editorial';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const chapters = await getEditorialChapters();
+
+  return chapters.map((chapter) => ({
+    params: {
+      piece: chapter.piece,
+      chapter: chapter.chapter,
+    },
+    props: {
+      currentChapter: chapter,
+    },
+  }));
+}
+
+interface Props {
+  currentChapter: EditorialChapter;
+}
+
+const { currentChapter } = Astro.props as Props;
+const chapters = await getEditorialChapters();
+const pieceChapters = chapters.filter((chapter) => chapter.piece === currentChapter.piece);
+const chapterIndex = pieceChapters.findIndex((chapter) => chapter.chapter === currentChapter.chapter);
+
+if (chapterIndex < 0) {
+  throw new Error(`Chapter "${currentChapter.chapter}" was not found for piece "${currentChapter.piece}".`);
+}
+
+const previousChapter = pieceChapters[chapterIndex - 1] ?? null;
+const nextChapter = pieceChapters[chapterIndex + 1] ?? null;
+const { Content } = await render(currentChapter.entry);
+---
+
+<BaseLayout title={`${currentChapter.entry.data.title} | Editorial`} noScroll>
+  <main class="h-screen overflow-hidden px-4 pb-4 pt-6 md:px-8 md:pb-8 md:pt-8">
+    <section class="mx-auto grid h-full w-full max-w-container-lg grid-rows-[auto_1fr] border border-hairline md:grid-cols-[280px_1fr] md:grid-rows-1">
+      <aside class="border-b border-hairline bg-soft p-5 md:border-b-0 md:border-r md:p-6">
+        <p class="text-xs uppercase tracking-[0.1em] text-muted">Piece</p>
+        <h1 class="mt-2 font-display text-xl leading-tight md:text-2xl">{currentChapter.entry.data.pieceTitle}</h1>
+        <p class="mt-3 text-sm text-muted">{currentChapter.entry.data.pieceSummary}</p>
+
+        <ol class="mt-6 space-y-2">
+          {
+            pieceChapters.map((chapter) => {
+              const isActive = chapter.chapter === currentChapter.chapter;
+              return (
+                <li>
+                  <a
+                    href={chapter.url}
+                    class:list={[
+                      'flex items-center justify-between border px-3 py-2 text-sm transition-colors duration-fast ease-standard',
+                      isActive
+                        ? 'border-fg bg-fg text-bg'
+                        : 'border-hairline bg-bg text-fg hover:border-fg hover:bg-fg hover:text-bg',
+                    ]}
+                    aria-current={isActive ? 'page' : undefined}
+                  >
+                    <span>Chapter {chapter.entry.data.chapterNumber}</span>
+                    <span class="ml-3 truncate">{chapter.entry.data.title}</span>
+                  </a>
+                </li>
+              );
+            })
+          }
+        </ol>
+      </aside>
+
+      <article class="grid min-h-0 grid-rows-[1fr_auto] bg-bg">
+        <div class="min-h-0 overflow-hidden p-5 md:p-8">
+          <header class="border-b border-hairline pb-4">
+            <p class="text-xs uppercase tracking-[0.08em] text-muted">Chapter {currentChapter.entry.data.chapterNumber}</p>
+            <h2 class="mt-2 font-display text-2xl leading-tight md:text-4xl">{currentChapter.entry.data.title}</h2>
+            <p class="mt-3 text-sm text-muted md:text-base">{currentChapter.entry.data.summary}</p>
+          </header>
+
+          <div class="pt-5 font-body text-sm leading-relaxed md:text-base [&_a]:underline [&_a]:underline-offset-4 [&_h2]:mt-7 [&_h2]:font-display [&_h2]:text-xl [&_h2]:leading-tight [&_p]:mt-4">
+            <Content />
+          </div>
+        </div>
+
+        <nav class="flex items-center justify-between border-t border-hairline p-4 text-xs uppercase tracking-[0.08em] md:p-5">
+          {previousChapter ? (
+            <a class="border border-hairline px-3 py-2 transition-colors duration-fast ease-standard hover:border-fg hover:bg-fg hover:text-bg" href={previousChapter.url}>
+              Prev
+            </a>
+          ) : (
+            <span class="border border-hairline px-3 py-2 text-muted">Prev</span>
+          )}
+
+          {nextChapter ? (
+            <a class="border border-hairline px-3 py-2 transition-colors duration-fast ease-standard hover:border-fg hover:bg-fg hover:text-bg" href={nextChapter.url}>
+              Next
+            </a>
+          ) : (
+            <span class="border border-hairline px-3 py-2 text-muted">Next</span>
+          )}
+        </nav>
+      </article>
+    </section>
+  </main>
+
+  <script
+    is:inline
+    define:vars={{
+      prevUrl: previousChapter?.url ?? '',
+      nextUrl: nextChapter?.url ?? '',
+    }}
+  >
+    const isEditableElement = (element) => {
+      if (!element) {
+        return false;
+      }
+
+      if (element instanceof HTMLInputElement || element instanceof HTMLTextAreaElement) {
+        return true;
+      }
+
+      return element instanceof HTMLElement && element.isContentEditable;
+    };
+
+    const isInteractiveTarget = (target) => {
+      return target instanceof Element && Boolean(target.closest('a, button, input, textarea, select, label'));
+    };
+
+    const SWIPE_MIN_DISTANCE = 48;
+    const SWIPE_MAX_OFF_AXIS = 42;
+    let touchStartX = null;
+    let touchStartY = null;
+
+    const resetSwipe = () => {
+      touchStartX = null;
+      touchStartY = null;
+    };
+
+    window.addEventListener('keydown', (event) => {
+      if (event.defaultPrevented || event.metaKey || event.ctrlKey || event.altKey || event.shiftKey) {
+        return;
+      }
+
+      if (isEditableElement(document.activeElement)) {
+        return;
+      }
+
+      if (event.key === 'ArrowLeft' && prevUrl) {
+        event.preventDefault();
+        window.location.assign(prevUrl);
+      }
+
+      if (event.key === 'ArrowRight' && nextUrl) {
+        event.preventDefault();
+        window.location.assign(nextUrl);
+      }
+    });
+
+    const swipeRoot = document.querySelector('main');
+    if (swipeRoot instanceof HTMLElement) {
+      swipeRoot.addEventListener(
+        'touchstart',
+        (event) => {
+          if (event.touches.length !== 1 || isInteractiveTarget(event.target)) {
+            resetSwipe();
+            return;
+          }
+
+          const touch = event.touches[0];
+          touchStartX = touch.clientX;
+          touchStartY = touch.clientY;
+        },
+        { passive: true }
+      );
+
+      swipeRoot.addEventListener(
+        'touchend',
+        (event) => {
+          if (touchStartX === null || touchStartY === null || event.changedTouches.length !== 1) {
+            resetSwipe();
+            return;
+          }
+
+          const touch = event.changedTouches[0];
+          const deltaX = touch.clientX - touchStartX;
+          const deltaY = touch.clientY - touchStartY;
+          const absX = Math.abs(deltaX);
+          const absY = Math.abs(deltaY);
+          resetSwipe();
+
+          if (absX < SWIPE_MIN_DISTANCE || absY > SWIPE_MAX_OFF_AXIS || absY > absX * 0.7) {
+            return;
+          }
+
+          if (deltaX > 0 && prevUrl) {
+            window.location.assign(prevUrl);
+            return;
+          }
+
+          if (deltaX < 0 && nextUrl) {
+            window.location.assign(nextUrl);
+          }
+        },
+        { passive: true }
+      );
+    }
+  </script>
+</BaseLayout>

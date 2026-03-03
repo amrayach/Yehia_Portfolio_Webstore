@@ -1,0 +1,66 @@
+---
+import { render } from 'astro:content';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import { getTextArticles, type TextArticle } from '../../lib/text';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const articles = await getTextArticles();
+
+  return articles.map((article) => ({
+    params: {
+      slug: article.slug,
+    },
+    props: {
+      article,
+    },
+  }));
+}
+
+interface Props {
+  article: TextArticle;
+}
+
+const { article } = Astro.props as Props;
+const { Content } = await render(article.entry);
+const pdfUrl = article.entry.data.pdfUrl ?? '/pdfs/text-placeholder.pdf';
+const publishDate = article.entry.data.publishDate?.toLocaleDateString('en-US', {
+  year: 'numeric',
+  month: 'long',
+  day: 'numeric',
+});
+---
+
+<BaseLayout title={`${article.entry.data.title} | Text`}>
+  <main class="min-h-screen px-4 pb-12 pt-6 md:px-8 md:pt-8">
+    <article class="mx-auto w-full max-w-[72ch]">
+      <header class="space-y-4 border-b border-hairline pb-6">
+        <p class="text-xs uppercase tracking-[0.1em] text-muted">Text</p>
+        <h1 class="font-display text-3xl leading-tight md:text-5xl">{article.entry.data.title}</h1>
+        <p class="font-body text-base leading-relaxed text-muted">{article.entry.data.excerpt}</p>
+
+        <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.08em] text-muted">
+          {publishDate && <span>{publishDate}</span>}
+          <a
+            class="inline-flex items-center gap-2 border border-fg px-3 py-2 text-fg transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
+            href={pdfUrl}
+            download
+          >
+            Download PDF
+          </a>
+          <a
+            class="inline-flex items-center gap-2 border border-hairline px-3 py-2 text-fg transition-colors duration-fast ease-standard hover:border-fg"
+            href="/text"
+          >
+            Back to Text
+          </a>
+        </div>
+      </header>
+
+      <div class="pt-7 font-body text-[1.02rem] leading-[1.85] md:text-[1.08rem] [&_a]:underline [&_a]:underline-offset-4 [&_h2]:mt-10 [&_h2]:font-display [&_h2]:text-2xl [&_h2]:leading-tight [&_p]:mt-5">
+        <Content />
+      </div>
+    </article>
+  </main>
+</BaseLayout>

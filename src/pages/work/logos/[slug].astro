@@ -1,0 +1,62 @@
+---
+import BaseLayout from '../../../layouts/BaseLayout.astro';
+import { getLogoItems, type WorkItem } from '../../../lib/work';
+
+export const prerender = true;
+
+export async function getStaticPaths() {
+  const logos = await getLogoItems();
+
+  return logos.map((logo) => ({
+    params: {
+      slug: logo.slug,
+    },
+    props: {
+      logo,
+    },
+  }));
+}
+
+interface Props {
+  logo: WorkItem;
+}
+
+const { logo } = Astro.props as Props;
+const pdfUrl = logo.entry.data.pdfUrl;
+
+if (!pdfUrl) {
+  throw new Error(`Logo entry "${logo.slug}" is missing a pdfUrl.`);
+}
+---
+
+<BaseLayout title={`${logo.entry.data.title} | Logos`}>
+  <main class="min-h-screen px-4 pb-10 pt-6 md:px-8 md:pb-12 md:pt-8">
+    <article class="mx-auto w-full max-w-container-lg space-y-6">
+      <header class="space-y-3 border-b border-hairline pb-4">
+        <p class="text-xs uppercase tracking-[0.1em] text-muted">Work / Logos</p>
+        <h1 class="font-display text-3xl leading-tight md:text-5xl">{logo.entry.data.title}</h1>
+        {logo.entry.data.summary && <p class="font-body text-sm leading-relaxed text-muted md:text-base">{logo.entry.data.summary}</p>}
+
+        <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.08em]">
+          <a
+            class="inline-flex items-center gap-2 border border-fg px-3 py-2 transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
+            href={pdfUrl}
+            download
+          >
+            Download PDF
+          </a>
+          <a
+            class="inline-flex items-center gap-2 border border-hairline px-3 py-2 transition-colors duration-fast ease-standard hover:border-fg"
+            href="/work/logos"
+          >
+            Back to Logos
+          </a>
+        </div>
+      </header>
+
+      <div class="border border-hairline bg-soft p-2 md:p-3">
+        <iframe title={`${logo.entry.data.title} PDF preview`} src={`${pdfUrl}#toolbar=0`} class="h-[72vh] w-full border-0 bg-bg"></iframe>
+      </div>
+    </article>
+  </main>
+</BaseLayout>
