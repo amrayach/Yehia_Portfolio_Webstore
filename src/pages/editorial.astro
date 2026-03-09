@@ -5,15 +5,15 @@ import { getEditorialPieces } from '../lib/editorial';
 const pieces = await getEditorialPieces();
 ---
 
-<BaseLayout title="Editorial | Yehia Moldan" noScroll>
-  <main class="h-screen overflow-hidden px-4 pb-4 pt-6 md:px-8 md:pb-8 md:pt-8">
-    <section class="mx-auto flex h-full w-full max-w-container-lg flex-col border border-hairline">
+<BaseLayout title="Editorial | Yehia Moldan">
+  <main id="main-content" class="min-h-screen px-4 pb-10 pt-6 md:px-8 md:pb-12 md:pt-8">
+    <section class="mx-auto flex w-full max-w-container-lg flex-col border border-hairline">
       <header class="space-y-2 border-b border-hairline px-5 py-4 md:px-8 md:py-6">
         <p class="text-xs uppercase tracking-[0.1em] text-muted">Editorial</p>
         <h1 class="font-display text-3xl leading-tight md:text-5xl">Chapter Index</h1>
       </header>
 
-      <div class="grid flex-1 gap-px overflow-hidden bg-hairline md:grid-cols-2">
+      <div class="grid gap-px bg-hairline md:grid-cols-2">
         {
           pieces.length === 0 ? (
             <article class="flex items-center justify-center bg-bg p-6 text-center text-sm text-muted md:text-base">
@@ -22,8 +22,14 @@ const pieces = await getEditorialPieces();
           ) : (
             pieces.map((piece) => {
               const firstChapter = piece.chapters[0];
+              const publishedDate = piece.latestPublishDate?.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'short',
+                day: 'numeric',
+              });
+
               return (
-                <article class="flex h-full flex-col justify-between bg-bg p-5 md:p-8">
+                <article class="card-hover flex h-full flex-col justify-between border border-transparent bg-bg p-5 md:p-8">
                   <div class="space-y-3">
                     <p class="text-xs uppercase tracking-[0.08em] text-muted">{piece.piece}</p>
                     <h2 class="font-display text-2xl leading-tight md:text-4xl">{piece.title}</h2>
@@ -31,11 +37,16 @@ const pieces = await getEditorialPieces();
                   </div>
 
                   <div class="mt-8 flex items-center justify-between border-t border-hairline pt-4 text-sm">
-                    <span class="text-muted">{piece.chapters.length} chapters</span>
+                    <div class="flex flex-wrap gap-3 text-xs uppercase tracking-[0.08em] text-muted">
+                      <span>{piece.chapters.length} chapters</span>
+                      <span>~{piece.totalReadingMinutes} min read</span>
+                      {publishedDate && <span>{publishedDate}</span>}
+                    </div>
                     {firstChapter && (
                       <a
                         class="inline-flex items-center gap-2 border border-fg px-3 py-2 text-xs uppercase tracking-[0.08em] transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
                         href={firstChapter.url}
+                        aria-label={`Open ${piece.title}`}
                       >
                         Open
                       </a>

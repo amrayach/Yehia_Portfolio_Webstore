@@ -16,7 +16,8 @@ pnpm dev
 ## Checks and build
 
 ```bash
-pnpm astro check
+pnpm lint
+pnpm test
 pnpm build
 pnpm preview
 ```
@@ -26,4 +27,7 @@ pnpm preview
 - Build command: `pnpm build`
 - Output directory: `dist`
 - Node version: active LTS (set `NODE_VERSION` in Pages if you need to pin)
-- Build-time env var: `PUBLIC_SITE_URL=https://<your-production-domain>`
+- Build-time env vars:
+  - `PUBLIC_SITE_URL=https://<your-production-domain>`
+  - `PUBLIC_INQUIRY_EMAIL=hello@<your-production-domain>`
+  - `PUBLIC_INSTAGRAM_HANDLE=<your_instagram_handle>`

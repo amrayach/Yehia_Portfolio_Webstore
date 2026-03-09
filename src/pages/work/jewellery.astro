@@ -1,22 +1,25 @@
 ---
+import Breadcrumb from '../../components/Breadcrumb.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import Lightbox from '../../components/Lightbox.astro';
 import { getWorkItemsByCategory } from '../../lib/work';
 
 const items = await getWorkItemsByCategory('jewellery');
+const lightboxImages = items
+  .filter((item) => Boolean(item.entry.data.image))
+  .map((item) => ({
+    src: item.entry.data.image!,
+    alt: item.entry.data.title,
+    caption: item.entry.data.summary ?? item.entry.data.title,
+  }));
 ---
 
 <BaseLayout title="Jewellery | Work">
-  <main class="min-h-screen px-4 pb-10 pt-6 md:px-8 md:pb-12 md:pt-8">
+  <main id="main-content" class="min-h-screen px-4 pb-10 pt-6 md:px-8 md:pb-12 md:pt-8">
     <section class="mx-auto w-full max-w-container-lg space-y-6">
       <header class="space-y-3 border-b border-hairline pb-4">
-        <p class="text-xs uppercase tracking-[0.1em] text-muted">Work / Jewellery</p>
+        <Breadcrumb items={[{ label: 'Work', href: '/work' }, { label: 'Jewellery' }]} />
         <h1 class="font-display text-3xl leading-tight md:text-5xl">Jewellery Gallery</h1>
-        <a
-          class="inline-flex items-center gap-2 border border-hairline px-3 py-2 text-xs uppercase tracking-[0.08em] transition-colors duration-fast ease-standard hover:border-fg"
-          href="/work"
-        >
-          Back to Work
-        </a>
       </header>
 
       {
@@ -24,15 +27,26 @@ const items = await getWorkItemsByCategory('jewellery');
           <article class="border border-hairline bg-bg p-6 text-sm text-muted md:text-base">No jewellery items published.</article>
         ) : (
           <div class="grid gap-6 md:grid-cols-2">
-            {items.map((item) => (
-              <article class="space-y-3 border border-hairline bg-bg p-4 md:p-5">
+            {items.map((item, index) => (
+              <article class="card-hover space-y-3 border border-hairline bg-bg p-4 md:p-5">
                 {item.entry.data.image && (
-                  <img
-                    src={item.entry.data.image}
-                    alt={item.entry.data.title}
-                    loading="lazy"
-                    class="aspect-[4/3] w-full border border-hairline object-cover"
-                  />
+                  <button
+                    type="button"
+                    data-lightbox-open="jewellery-gallery"
+                    data-lightbox-index={index}
+                    class="img-hover w-full border border-hairline p-0 text-left"
+                    aria-label={`Open ${item.entry.data.title} image in full view`}
+                  >
+                    <img
+                      src={item.entry.data.image}
+                      alt={item.entry.data.title}
+                      loading="lazy"
+                      decoding="async"
+                      width="1200"
+                      height="900"
+                      class="aspect-[4/3] w-full object-cover"
+                    />
+                  </button>
                 )}
                 <h2 class="font-display text-2xl leading-tight">{item.entry.data.title}</h2>
                 {item.entry.data.summary && <p class="font-body text-sm leading-relaxed text-muted md:text-base">{item.entry.data.summary}</p>}
@@ -43,4 +57,7 @@ const items = await getWorkItemsByCategory('jewellery');
       }
     </section>
   </main>
+  {lightboxImages.length > 0 && (
+    <Lightbox galleryId="jewellery-gallery" galleryLabel="Jewellery gallery image viewer" images={lightboxImages} />
+  )}
 </BaseLayout>

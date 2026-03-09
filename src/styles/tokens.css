@@ -24,3 +24,11 @@
   --duration-base: 220ms;
   --ease-standard: cubic-bezier(0.2, 0.8, 0.2, 1);
 }
+
+html[data-theme='inverse'] {
+  --color-bg: #0a0a0a;
+  --color-fg: #ffffff;
+  --color-muted: #b8b8b8;
+  --color-soft: #171717;
+  --color-hairline: #383838;
+}

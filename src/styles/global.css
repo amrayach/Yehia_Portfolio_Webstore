@@ -4,8 +4,60 @@
 @tailwind components;
 @tailwind utilities;
 
+@font-face {
+  font-family: 'Syne';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/syne-400-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Syne';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/syne-600-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Syne';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: url('/fonts/syne-700-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-weight: 400;
+  font-display: swap;
+  src: url('/fonts/instrument-sans-400-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-weight: 500;
+  font-display: swap;
+  src: url('/fonts/instrument-sans-500-latin.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Instrument Sans';
+  font-style: normal;
+  font-weight: 600;
+  font-display: swap;
+  src: url('/fonts/instrument-sans-600-latin.woff2') format('woff2');
+}
+
 :root {
   color-scheme: light;
+}
+
+html[data-theme='inverse'] {
+  color-scheme: dark;
 }
 
 html,
@@ -19,4 +71,98 @@ body {
 
 a {
   color: inherit;
+}
+
+.card-hover {
+  transition:
+    transform var(--duration-base) var(--ease-standard),
+    border-color var(--duration-base) var(--ease-standard),
+    background-color var(--duration-base) var(--ease-standard);
+}
+
+.card-hover:hover,
+.card-hover:focus-within {
+  transform: translateY(-2px);
+  border-color: var(--color-fg);
+}
+
+.img-hover {
+  overflow: hidden;
+}
+
+.img-hover > img {
+  transform: scale(1);
+  transition: transform var(--duration-base) var(--ease-standard);
+}
+
+.img-hover:hover > img,
+.img-hover:focus-within > img {
+  transform: scale(1.03);
+}
+
+.field-control {
+  transition: border-color var(--duration-fast) var(--ease-standard);
+}
+
+.field-error {
+  min-height: 1.1rem;
+  font-size: 0.72rem;
+  letter-spacing: 0.06em;
+  text-transform: uppercase;
+  color: var(--color-muted);
+}
+
+.fade-in-up {
+  opacity: 0;
+  transform: translateY(10px);
+  animation: fade-in-up 420ms var(--ease-standard) forwards;
+}
+
+@keyframes fade-in-up {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+:where(a, button, input, textarea, select, summary, [tabindex]):focus-visible {
+  outline: 2px solid var(--color-fg);
+  outline-offset: 2px;
+}
+
+.skip-link {
+  text-decoration: none;
+}
+
+.theme-toggle[data-active='true'] {
+  border-color: var(--color-fg);
+  background: var(--color-fg);
+  color: var(--color-bg);
+}
+
+.theme-toggle[data-active='false'] {
+  border-color: transparent;
+  background: transparent;
+  color: var(--color-fg);
+}
+
+.theme-toggle[data-active='false']:hover {
+  border-color: var(--color-hairline);
+  background: var(--color-soft);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    scroll-behavior: auto !important;
+    transition-duration: 0.01ms !important;
+  }
 }

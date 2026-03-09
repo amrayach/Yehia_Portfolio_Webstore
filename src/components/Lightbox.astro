@@ -1,0 +1,194 @@
+---
+interface LightboxImage {
+  src: string;
+  alt: string;
+  caption?: string;
+}
+
+interface Props {
+  galleryId: string;
+  galleryLabel: string;
+  images: LightboxImage[];
+}
+
+const { galleryId, galleryLabel, images } = Astro.props as Props;
+---
+
+<dialog
+  data-lightbox-dialog={galleryId}
+  aria-label={galleryLabel}
+  class="lightbox-dialog m-0 h-screen w-screen max-w-none border-0 bg-transparent p-0 text-fg"
+>
+  <div class="lightbox-overlay grid h-full w-full grid-cols-[auto_1fr_auto] items-center bg-fg/95 px-2 py-6 md:px-4">
+    <button
+      type="button"
+      data-lightbox-prev
+      class="mx-1 h-12 w-12 border border-bg text-xl text-bg transition-colors duration-fast ease-standard hover:bg-bg hover:text-fg"
+      aria-label="Previous image"
+    >
+      ‹
+    </button>
+
+    <figure class="mx-auto flex h-full w-full max-w-[90vw] flex-col items-center justify-center gap-4">
+      <img data-lightbox-image alt="" class="max-h-[85vh] w-auto max-w-[90vw] object-contain" />
+      <figcaption data-lightbox-caption class="text-center text-xs uppercase tracking-[0.08em] text-bg"></figcaption>
+    </figure>
+
+    <button
+      type="button"
+      data-lightbox-next
+      class="mx-1 h-12 w-12 border border-bg text-xl text-bg transition-colors duration-fast ease-standard hover:bg-bg hover:text-fg"
+      aria-label="Next image"
+    >
+      ›
+    </button>
+  </div>
+
+  <button
+    type="button"
+    data-lightbox-close
+    class="absolute right-4 top-4 h-11 w-11 border border-bg text-2xl text-bg transition-colors duration-fast ease-standard hover:bg-bg hover:text-fg"
+    aria-label="Close image viewer"
+  >
+    ×
+  </button>
+</dialog>
+
+<script is:inline data-astro-rerun define:vars={{ galleryId, images }}>
+  (() => {
+    const dialog = document.querySelector(`dialog[data-lightbox-dialog="${galleryId}"]`);
+    if (!(dialog instanceof HTMLDialogElement)) {
+      return;
+    }
+
+    const allImages = Array.isArray(images) ? images : [];
+    if (allImages.length === 0) {
+      return;
+    }
+
+    const triggers = Array.from(document.querySelectorAll(`[data-lightbox-open="${galleryId}"]`)).filter(
+      (node) => node instanceof HTMLButtonElement
+    );
+    const imageEl = dialog.querySelector('[data-lightbox-image]');
+    const captionEl = dialog.querySelector('[data-lightbox-caption]');
+    const closeEl = dialog.querySelector('[data-lightbox-close]');
+    const prevEl = dialog.querySelector('[data-lightbox-prev]');
+    const nextEl = dialog.querySelector('[data-lightbox-next]');
+
+    if (
+      !(imageEl instanceof HTMLImageElement) ||
+      !(captionEl instanceof HTMLElement) ||
+      !(closeEl instanceof HTMLButtonElement) ||
+      !(prevEl instanceof HTMLButtonElement) ||
+      !(nextEl instanceof HTMLButtonElement)
+    ) {
+      return;
+    }
+
+    let activeIndex = 0;
+    let focusReturnTarget = null;
+    let originalOverflow = '';
+
+    const render = () => {
+      const current = allImages[activeIndex];
+      if (!current) {
+        return;
+      }
+
+      imageEl.src = current.src;
+      imageEl.alt = current.alt;
+      captionEl.textContent = current.caption ?? current.alt ?? '';
+      prevEl.disabled = allImages.length <= 1;
+      nextEl.disabled = allImages.length <= 1;
+    };
+
+    const openAtIndex = (index, trigger) => {
+      activeIndex = Math.max(0, Math.min(allImages.length - 1, index));
+      focusReturnTarget = trigger instanceof HTMLElement ? trigger : null;
+      render();
+
+      originalOverflow = document.body.style.overflow;
+      document.body.style.overflow = 'hidden';
+      dialog.showModal();
+      closeEl.focus();
+    };
+
+    const closeDialog = () => {
+      if (dialog.open) {
+        dialog.close();
+      }
+      document.body.style.overflow = originalOverflow;
+      focusReturnTarget?.focus?.();
+      focusReturnTarget = null;
+    };
+
+    const showPrevious = () => {
+      activeIndex = activeIndex === 0 ? allImages.length - 1 : activeIndex - 1;
+      render();
+    };
+
+    const showNext = () => {
+      activeIndex = activeIndex === allImages.length - 1 ? 0 : activeIndex + 1;
+      render();
+    };
+
+    const triggerHandlers = triggers.map((trigger) => {
+      const button = trigger;
+      const handleClick = () => {
+        const index = Number(button.dataset.lightboxIndex ?? '0');
+        openAtIndex(Number.isFinite(index) ? index : 0, button);
+      };
+      button.addEventListener('click', handleClick);
+      return () => button.removeEventListener('click', handleClick);
+    });
+
+    const onDialogClick = (event) => {
+      if (event.target === dialog) {
+        closeDialog();
+      }
+    };
+
+    const onDialogClose = () => {
+      document.body.style.overflow = originalOverflow;
+      focusReturnTarget?.focus?.();
+      focusReturnTarget = null;
+    };
+
+    const onKeyDown = (event) => {
+      if (event.key === 'ArrowLeft') {
+        event.preventDefault();
+        showPrevious();
+      } else if (event.key === 'ArrowRight') {
+        event.preventDefault();
+        showNext();
+      } else if (event.key === 'Escape') {
+        event.preventDefault();
+        closeDialog();
+      }
+    };
+
+    closeEl.addEventListener('click', closeDialog);
+    prevEl.addEventListener('click', showPrevious);
+    nextEl.addEventListener('click', showNext);
+    dialog.addEventListener('click', onDialogClick);
+    dialog.addEventListener('close', onDialogClose);
+    dialog.addEventListener('keydown', onKeyDown);
+
+    const cleanup = () => {
+      triggerHandlers.forEach((removeListener) => removeListener());
+      closeEl.removeEventListener('click', closeDialog);
+      prevEl.removeEventListener('click', showPrevious);
+      nextEl.removeEventListener('click', showNext);
+      dialog.removeEventListener('click', onDialogClick);
+      dialog.removeEventListener('close', onDialogClose);
+      dialog.removeEventListener('keydown', onKeyDown);
+      document.removeEventListener('astro:before-swap', cleanup);
+      if (dialog.open) {
+        dialog.close();
+      }
+      document.body.style.overflow = originalOverflow;
+    };
+
+    document.addEventListener('astro:before-swap', cleanup);
+  })();
+</script>

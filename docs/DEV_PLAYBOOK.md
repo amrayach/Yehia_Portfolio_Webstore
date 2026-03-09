@@ -23,7 +23,8 @@ pnpm install
 pnpm dev
 
 # type/content/build checks
-pnpm astro check
+pnpm lint
+pnpm test
 pnpm build
 
 # local preview of production build
@@ -56,17 +57,19 @@ Examples:
 - Node version: use active LTS in Pages settings (assume LTS baseline; set `NODE_VERSION` if your Pages project is pinned).
 - Astro deployment mode is static-first: `output: static`, `outDir: dist`, `@astrojs/cloudflare` adapter.
 - Set `PUBLIC_SITE_URL` in Pages environment variables so canonical, OpenGraph, and sitemap URLs resolve to the production domain.
+- Set `PUBLIC_INQUIRY_EMAIL` and `PUBLIC_INSTAGRAM_HANDLE` so inquiry links resolve to real channels.
 - Keep environment vars minimal for MVP (inquiry-only architecture).
 
 ## Pre-Merge Checklist
 - All updated docs remain consistent with non-negotiables.
-- No-scroll behavior unchanged on Home and Editorial routes.
+- No-scroll behavior unchanged on Home route.
 - Shop remains inquiry-only (no active checkout UI/code path).
 - Mobile and desktop layouts verified.
 - No broken internal links or missing assets.
 
 ## Release Checklist
 - Build succeeds in CI/local.
+- `pnpm lint`, `pnpm test`, and `pnpm build` pass.
 - Confirm Cloudflare preview deploy renders core routes.
 - Smoke test:
   - `/`
@@ -81,6 +84,9 @@ Examples:
 - Prioritize static pages and content collections over runtime features.
 - Avoid introducing server-side dependencies unless explicitly approved.
 - Add new third-party integrations only with clear operational ownership.
+- Image handling rule:
+  - Keep current SVG assets in `public/` with explicit `width`/`height` attributes on `<img>`.
+  - For new raster images (`jpg`, `png`, `webp`, `avif`), place assets under `src/` and render with `astro:assets` (`<Image />` or `<Picture />`) for responsive optimization.
 
 ## Future Phase Notes
 - Payment phase can introduce stablecoin checkout (e.g., Triple-A) later.

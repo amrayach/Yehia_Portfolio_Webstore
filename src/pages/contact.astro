@@ -1,37 +1,268 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
+import { INQUIRY_CONTACT } from '../lib/site';
+
+const instagramLabel = INQUIRY_CONTACT.instagramHandle ? `@${INQUIRY_CONTACT.instagramHandle}` : INQUIRY_CONTACT.instagramProfileUrl;
+const messageMaxLength = 1600;
 ---
 
 <BaseLayout title="Contact | Yehia Moldan" description="Contact and inquiry route for Yehia Moldan.">
-  <main class="min-h-screen px-4 pb-10 pt-6 md:px-8 md:pb-12 md:pt-8">
+  <main id="main-content" class="min-h-screen px-4 pb-10 pt-6 md:px-8 md:pb-12 md:pt-8">
     <section class="mx-auto w-full max-w-container-sm space-y-6 border border-hairline bg-bg p-6 md:p-8">
       <header class="space-y-3 border-b border-hairline pb-4">
         <p class="text-xs uppercase tracking-[0.1em] text-muted">Contact</p>
         <h1 class="font-display text-3xl leading-tight md:text-5xl">Inquiry</h1>
         <p class="font-body text-sm leading-relaxed text-muted md:text-base">
-          Use email or Instagram DM for inquiry-only requests.
+          Share your inquiry details first, then confirm and send through email or Instagram.
         </p>
       </header>
 
       <div class="space-y-3 text-sm md:text-base">
-        <p>
-          Email:
-          <a class="underline underline-offset-4" href="mailto:hello@example.com">hello@example.com</a>
-        </p>
-        <p>
-          Instagram:
-          <a class="underline underline-offset-4" href="https://instagram.com/your_instagram_handle" rel="noreferrer" target="_blank">
-            @your_instagram_handle
-          </a>
-        </p>
+        {INQUIRY_CONTACT.hasEmail ? (
+          <p>
+            Email:
+            <a class="underline underline-offset-4" href={`mailto:${INQUIRY_CONTACT.inquiryEmail}`}>
+              {INQUIRY_CONTACT.inquiryEmail}
+            </a>
+          </p>
+        ) : (
+          <p class="text-muted">Inquiry email is not configured yet.</p>
+        )}
+        {INQUIRY_CONTACT.hasInstagram ? (
+          <p>
+            Instagram:
+            <a class="underline underline-offset-4" href={INQUIRY_CONTACT.instagramProfileUrl} rel="noopener noreferrer" target="_blank">
+              {instagramLabel}
+            </a>
+          </p>
+        ) : (
+          <p class="text-muted">Instagram inquiry link is not configured yet.</p>
+        )}
       </div>
 
-      <a
-        class="inline-flex items-center border border-fg px-3 py-2 text-xs uppercase tracking-[0.08em] transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
-        href="/inquiry/success"
-      >
-        View Inquiry Success State
-      </a>
+      <form class="space-y-4 border-t border-hairline pt-5" method="GET" action="/inquiry/success" data-inquiry-form data-astro-reload novalidate>
+        <input type="hidden" name="source" value="contact-form" />
+
+        <label class="block space-y-2">
+          <span class="text-xs uppercase tracking-[0.08em] text-muted">
+            Name
+            <span aria-hidden="true">*</span>
+          </span>
+          <input
+            class="field-control w-full border border-hairline bg-bg px-3 py-2 text-sm md:text-base"
+            id="name"
+            name="name"
+            type="text"
+            autocomplete="name"
+            aria-describedby="name-error"
+            required
+            minlength="2"
+            maxlength="80"
+            placeholder="Your name"
+          />
+          <p id="name-error" class="field-error" data-error-for="name" aria-live="polite"></p>
+        </label>
+
+        <label class="block space-y-2">
+          <span class="text-xs uppercase tracking-[0.08em] text-muted">
+            Reply Channel
+            <span aria-hidden="true">*</span>
+          </span>
+          <select
+            class="field-control w-full border border-hairline bg-bg px-3 py-2 text-sm md:text-base"
+            id="replyChannel"
+            name="replyChannel"
+            required
+            aria-describedby="replyChannel-error"
+          >
+            <option value="email">Email</option>
+            <option value="instagram">Instagram</option>
+          </select>
+          <p id="replyChannel-error" class="field-error" data-error-for="replyChannel" aria-live="polite"></p>
+        </label>
+
+        <label class="block space-y-2">
+          <span class="text-xs uppercase tracking-[0.08em] text-muted">
+            Reply Contact
+            <span aria-hidden="true">*</span>
+          </span>
+          <input
+            class="field-control w-full border border-hairline bg-bg px-3 py-2 text-sm md:text-base"
+            id="replyTo"
+            name="replyTo"
+            type="text"
+            aria-describedby="replyTo-error"
+            required
+            minlength="3"
+            maxlength="120"
+            placeholder="you@email.com or @your_handle"
+          />
+          <p id="replyTo-error" class="field-error" data-error-for="replyTo" aria-live="polite"></p>
+        </label>
+
+        <label class="block space-y-2">
+          <span class="text-xs uppercase tracking-[0.08em] text-muted">
+            Subject
+            <span aria-hidden="true">*</span>
+          </span>
+          <input
+            class="field-control w-full border border-hairline bg-bg px-3 py-2 text-sm md:text-base"
+            id="subject"
+            name="subject"
+            type="text"
+            aria-describedby="subject-error"
+            required
+            minlength="4"
+            maxlength="120"
+            placeholder="What is this inquiry about?"
+          />
+          <p id="subject-error" class="field-error" data-error-for="subject" aria-live="polite"></p>
+        </label>
+
+        <label class="block space-y-2">
+          <span class="text-xs uppercase tracking-[0.08em] text-muted">
+            Message
+            <span aria-hidden="true">*</span>
+          </span>
+          <textarea
+            class="field-control min-h-[140px] w-full border border-hairline bg-bg px-3 py-2 text-sm leading-relaxed md:text-base"
+            id="message"
+            data-message-input
+            name="message"
+            aria-describedby="message-error message-counter"
+            required
+            minlength="20"
+            maxlength={messageMaxLength}
+            placeholder="Share context, timeline, and any references."
+          ></textarea>
+          <p id="message-counter" class="text-xs uppercase tracking-[0.08em] text-muted">
+            <span data-char-count>0</span>/{messageMaxLength}
+          </p>
+          <p id="message-error" class="field-error" data-error-for="message" aria-live="polite"></p>
+        </label>
+
+        <button
+          type="submit"
+          class="inline-flex items-center border border-fg bg-fg px-3 py-2 text-xs uppercase tracking-[0.08em] text-bg transition-colors duration-fast ease-standard hover:bg-bg hover:text-fg"
+        >
+          Continue to Confirmation
+        </button>
+        <p class="text-xs leading-relaxed text-muted">
+          You will review your inquiry and choose the send channel on the next page.
+        </p>
+      </form>
     </section>
   </main>
+
+  <script is:inline data-astro-rerun>
+    (() => {
+      const form = document.querySelector('[data-inquiry-form]');
+      if (!(form instanceof HTMLFormElement)) {
+        return;
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const subject = params.get('subject');
+      const message = params.get('message');
+
+      if (subject) {
+        const subjectInput = form.elements.namedItem('subject');
+        if (subjectInput instanceof HTMLInputElement && !subjectInput.value) {
+          subjectInput.value = subject;
+        }
+      }
+
+      if (message) {
+        const messageInput = form.elements.namedItem('message');
+        if (messageInput instanceof HTMLTextAreaElement && !messageInput.value) {
+          messageInput.value = message;
+        }
+      }
+
+      const textInputSelector = 'input, textarea, select';
+      const controls = Array.from(form.querySelectorAll(textInputSelector)).filter(
+        (node) => node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement || node instanceof HTMLSelectElement
+      );
+      const messageInput = form.querySelector('[data-message-input]');
+      const charCount = form.querySelector('[data-char-count]');
+
+      const updateCharCount = () => {
+        if (!(messageInput instanceof HTMLTextAreaElement) || !(charCount instanceof HTMLElement)) {
+          return;
+        }
+        charCount.textContent = String(messageInput.value.length);
+      };
+
+      const getValidationMessage = (field) => {
+        if (field.validity.valid) {
+          return '';
+        }
+
+        if (field.validity.valueMissing) {
+          return `${field.name} is required.`;
+        }
+        if (field.validity.tooShort) {
+          return `${field.name} is too short.`;
+        }
+        if (field.validity.tooLong) {
+          return `${field.name} is too long.`;
+        }
+        if (field.validity.typeMismatch) {
+          return `${field.name} format is invalid.`;
+        }
+
+        return `Please provide a valid ${field.name}.`;
+      };
+
+      const setFieldState = (field) => {
+        const errorNode = form.querySelector(`[data-error-for="${field.name}"]`);
+        if (!(errorNode instanceof HTMLElement)) {
+          return field.validity.valid;
+        }
+
+        const messageText = getValidationMessage(field);
+        field.setCustomValidity(messageText);
+        errorNode.textContent = messageText;
+        field.setAttribute('aria-invalid', messageText ? 'true' : 'false');
+        return !messageText;
+      };
+
+      const validateForm = () => {
+        let firstInvalid = null;
+
+        controls.forEach((field) => {
+          const isValid = setFieldState(field);
+          if (!isValid && firstInvalid === null) {
+            firstInvalid = field;
+          }
+        });
+
+        if (firstInvalid) {
+          firstInvalid.focus();
+          return false;
+        }
+
+        return true;
+      };
+
+      controls.forEach((field) => {
+        const runValidation = () => {
+          setFieldState(field);
+        };
+        field.addEventListener('input', runValidation);
+        field.addEventListener('blur', runValidation);
+      });
+
+      form.addEventListener('submit', (event) => {
+        if (!validateForm()) {
+          event.preventDefault();
+        }
+      });
+
+      if (messageInput instanceof HTMLTextAreaElement) {
+        messageInput.addEventListener('input', updateCharCount);
+      }
+      updateCharCount();
+    })();
+  </script>
 </BaseLayout>

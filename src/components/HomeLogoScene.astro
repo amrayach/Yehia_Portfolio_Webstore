@@ -4,6 +4,10 @@ const modelPath = '/assets/mashallah_avav_logo.glb';
 
 <section class="logo-scene-wrapper" aria-label="Rotating Mashallah AVAV logo">
   <div class="logo-scene" data-home-logo-scene data-model-path={modelPath}>
+    <div class="logo-loading" data-logo-loading aria-hidden="true">
+      <span class="logo-loading-line"></span>
+      <span class="logo-loading-line"></span>
+    </div>
     <canvas class="logo-canvas" aria-hidden="true"></canvas>
     <p class="logo-fallback" data-logo-fallback hidden>
       3D logo is temporarily unavailable.
@@ -30,6 +34,29 @@ const modelPath = '/assets/mashallah_avav_logo.glb';
     height: 100%;
   }
 
+  .logo-loading {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-content: center;
+    gap: 10px;
+    padding: 16%;
+    background: linear-gradient(120deg, var(--color-soft), var(--color-bg), var(--color-soft));
+    background-size: 200% 100%;
+    animation: logo-shimmer 1.5s linear infinite;
+  }
+
+  .logo-loading[hidden] {
+    display: none !important;
+  }
+
+  .logo-loading-line {
+    display: block;
+    height: 1px;
+    width: min(54vw, 280px);
+    background: var(--color-hairline);
+  }
+
   .logo-fallback {
     position: absolute;
     inset: 0;
@@ -51,33 +78,103 @@ const modelPath = '/assets/mashallah_avav_logo.glb';
       width: min(86vw, 400px);
     }
   }
+
+  @keyframes logo-shimmer {
+    from {
+      background-position: 0% 50%;
+    }
+
+    to {
+      background-position: 200% 50%;
+    }
+  }
 </style>
 
-<script type="module" is:inline>
-  import * as THREE from '/vendor/three/three.module.js';
-  import { GLTFLoader } from '/vendor/three/loaders/GLTFLoader.js';
-  import { DRACOLoader } from '/vendor/three/loaders/DRACOLoader.js';
+<script type="module" is:inline data-astro-rerun>
+  const HOME_LOGO_LISTENER_KEY = '__ymHomeLogoPageLoadListener';
 
-  const root = document.querySelector('[data-home-logo-scene]');
-  if (root instanceof HTMLElement) {
-    void initScene(root);
+  const bootstrapScenes = () => {
+    const roots = document.querySelectorAll('[data-home-logo-scene]');
+    roots.forEach((root) => {
+      if (!(root instanceof HTMLElement) || root.dataset.sceneBooted === 'true') {
+        return;
+      }
+      root.dataset.sceneBooted = 'true';
+      lazilyInitializeScene(root);
+    });
+  };
+
+  bootstrapScenes();
+
+  if (!window[HOME_LOGO_LISTENER_KEY]) {
+    window[HOME_LOGO_LISTENER_KEY] = true;
+    document.addEventListener('astro:page-load', bootstrapScenes);
+  }
+
+  function lazilyInitializeScene(root) {
+    let initialized = false;
+
+    const start = () => {
+      if (initialized) {
+        return;
+      }
+      initialized = true;
+
+      const run = () => {
+        void initScene(root);
+      };
+
+      if ('requestIdleCallback' in window) {
+        window.requestIdleCallback(run, { timeout: 1200 });
+      } else {
+        window.setTimeout(run, 0);
+      }
+    };
+
+    if ('IntersectionObserver' in window) {
+      const observer = new IntersectionObserver(
+        (entries) => {
+          if (!entries.some((entry) => entry.isIntersecting)) {
+            return;
+          }
+
+          observer.disconnect();
+          start();
+        },
+        { rootMargin: '220px' }
+      );
+      observer.observe(root);
+      return;
+    }
+
+    start();
   }
 
   async function initScene(root) {
     const canvas = root.querySelector('.logo-canvas');
     const fallback = root.querySelector('[data-logo-fallback]');
+    const loading = root.querySelector('[data-logo-loading]');
 
     if (!(canvas instanceof HTMLCanvasElement)) {
       return;
     }
 
+    setLoadingState(loading, true);
+
     if (!('WebGLRenderingContext' in window)) {
+      setLoadingState(loading, false);
       showFallback(fallback);
       return;
     }
 
     let cleanup = () => undefined;
     try {
+      const [THREE, { GLTFLoader }, { DRACOLoader }] = await Promise.all([
+        import('/vendor/three/three.module.js'),
+        import('/vendor/three/loaders/GLTFLoader.js'),
+        import('/vendor/three/loaders/DRACOLoader.js'),
+      ]);
+
       const scene = new THREE.Scene();
       const camera = new THREE.PerspectiveCamera(34, 1, 0.1, 100);
       camera.position.set(0, 0, 5.2);
@@ -199,6 +296,7 @@ const modelPath = '/assets/mashallah_avav_logo.glb';
         rafId = requestAnimationFrame(renderFrame);
       };
       renderFrame();
+      setLoadingState(loading, false);
 
       cleanup = () => {
         if (stopped) return;
@@ -230,9 +328,17 @@ const modelPath = '/assets/mashallah_avav_logo.glb';
       document.addEventListener('astro:before-swap', cleanup, { once: true });
     } catch (error) {
       cleanup();
+      setLoadingState(loading, false);
       showFallback(fallback);
       console.error('[HomeLogoScene] Failed to initialize 3D logo scene.', error);
     }
+  }
+
+  function setLoadingState(loading, visible) {
+    if (!(loading instanceof HTMLElement)) {
+      return;
+    }
+    loading.hidden = !visible;
   }
 
   function showFallback(fallback) {

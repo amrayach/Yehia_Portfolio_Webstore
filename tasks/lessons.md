@@ -15,3 +15,11 @@
   - I assumed the GLB was plain (non-Draco) and did not validate decoder requirements with a real browser/runtime pass before handoff.
 - Rule for next time:
   - For new 3D assets, verify codec/compression requirements (`Draco`, `KTX2`, etc.) and wire required loaders/decoder assets before declaring the integration complete.
+
+## 2026-03-03: Verify current framework APIs before planning implementation details
+- What went wrong:
+  - The plan used `ViewTransitions` instead of Astro's current `ClientRouter` API and did not fully account for script lifecycle behavior under client routing.
+- Why it happened:
+  - I leaned on stale memory of older transition patterns instead of anchoring every implementation detail to current docs before drafting the execution plan.
+- Rule for next time:
+  - For framework-level APIs (routing/transitions/assets), verify against current official docs first and include explicit lifecycle/cleanup requirements in the initial plan.

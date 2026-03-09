@@ -1,0 +1,39 @@
+---
+interface BreadcrumbItem {
+  label: string;
+  href?: string;
+}
+
+interface Props {
+  items: BreadcrumbItem[];
+}
+
+const { items } = Astro.props as Props;
+const breadcrumbItems = items.filter((item) => item.label.trim().length > 0);
+---
+
+{
+  breadcrumbItems.length > 0 && (
+    <nav aria-label="Breadcrumb">
+      <ol class="flex flex-wrap items-center gap-2 text-xs uppercase tracking-[0.08em] text-muted">
+        {breadcrumbItems.map((item, index) => {
+          const isLast = index === breadcrumbItems.length - 1;
+          return (
+            <li class="flex items-center gap-2">
+              {index > 0 && <span aria-hidden="true">/</span>}
+              {item.href && !isLast ? (
+                <a href={item.href} class="transition-colors duration-fast ease-standard hover:text-fg">
+                  {item.label}
+                </a>
+              ) : (
+                <span aria-current={isLast ? 'page' : undefined} class={isLast ? 'text-fg' : undefined}>
+                  {item.label}
+                </span>
+              )}
+            </li>
+          );
+        })}
+      </ol>
+    </nav>
+  )
+}

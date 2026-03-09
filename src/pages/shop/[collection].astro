@@ -1,5 +1,6 @@
 ---
 import InquiryCtaGroup from '../../components/InquiryCtaGroup.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getShopCollections, getShopItems, type ShopCollection } from '../../lib/shop';
 
@@ -27,18 +28,12 @@ const items = getShopItems(collection);
 ---
 
 <BaseLayout title={`${collection.entry.data.title} | Shop`} description="Inquiry-only collection detail.">
-  <main class="min-h-screen px-4 pb-12 pt-6 md:px-8 md:pt-8">
+  <main id="main-content" class="min-h-screen px-4 pb-12 pt-6 md:px-8 md:pt-8">
     <section class="mx-auto w-full max-w-container-lg space-y-6">
       <header class="space-y-3 border-b border-hairline pb-4">
-        <p class="text-xs uppercase tracking-[0.1em] text-muted">Shop / {collection.entry.data.title}</p>
+        <Breadcrumb items={[{ label: 'Shop', href: '/shop' }, { label: collection.entry.data.title }]} />
         <h1 class="font-display text-3xl leading-tight md:text-5xl">{collection.entry.data.title}</h1>
         <p class="max-w-[64ch] font-body text-sm leading-relaxed text-muted md:text-base">{collection.entry.data.description}</p>
-        <a
-          class="inline-flex items-center border border-hairline px-3 py-2 text-xs uppercase tracking-[0.08em] transition-colors duration-fast ease-standard hover:border-fg"
-          href="/shop"
-        >
-          Back to Shop
-        </a>
       </header>
 
       {
@@ -47,16 +42,24 @@ const items = getShopItems(collection);
         ) : (
           <div class="grid gap-px border border-hairline bg-hairline md:grid-cols-2 lg:grid-cols-3">
             {items.map((item) => (
-              <article class="flex h-full flex-col justify-between bg-bg p-4 md:p-5">
+              <article class="card-hover flex h-full flex-col justify-between border border-transparent bg-bg p-4 md:p-5">
                 <div class="space-y-4">
-                  <img
-                    src={item.image}
-                    alt={item.title}
-                    loading="lazy"
-                    class="aspect-square w-full border border-hairline object-cover"
-                  />
+                  <div class="img-hover border border-hairline">
+                    <img
+                      src={item.image}
+                      alt={item.title}
+                      loading="lazy"
+                      decoding="async"
+                      width="1200"
+                      height="1200"
+                      class="aspect-square w-full object-cover"
+                    />
+                  </div>
                   <div class="space-y-2">
-                    <p class="inline-flex border border-fg bg-fg px-2 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.09em] text-bg">
+                    <p
+                      class="inline-flex border border-fg bg-fg px-2 py-1 text-[0.65rem] font-semibold uppercase tracking-[0.09em] text-bg"
+                      aria-label={`Status: ${item.statusLabel.toLowerCase()}`}
+                    >
                       {item.statusLabel}
                     </p>
                     <h2 class="font-display text-xl leading-tight md:text-2xl">{item.title}</h2>
@@ -64,7 +67,7 @@ const items = getShopItems(collection);
                   </div>
                 </div>
 
-                <InquiryCtaGroup instagramUrl={item.instagramInquiryUrl} emailUrl={item.emailInquiryUrl} />
+                <InquiryCtaGroup instagramUrl={item.instagramInquiryUrl} emailUrl={item.emailInquiryUrl} contextLabel={item.title} />
               </article>
             ))}
           </div>

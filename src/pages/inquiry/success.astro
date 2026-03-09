@@ -1,22 +1,52 @@
 ---
 import BaseLayout from '../../layouts/BaseLayout.astro';
+import { INQUIRY_CONTACT } from '../../lib/site';
+
+const hasSendChannel = INQUIRY_CONTACT.hasEmail || INQUIRY_CONTACT.hasInstagram;
 ---
 
 <BaseLayout title="Inquiry Success | Yehia Moldan" description="Inquiry confirmation page." noIndex>
-  <main class="grid min-h-screen place-items-center px-4 py-10">
-    <section class="w-full max-w-container-sm space-y-5 border border-hairline bg-bg p-8 text-center md:p-10">
+  <main id="main-content" class="grid min-h-screen place-items-center px-4 py-10">
+    <section
+      class="w-full max-w-container-sm space-y-5 border border-hairline bg-bg p-8 text-center md:p-10"
+      data-inquiry-success
+      data-email-address={INQUIRY_CONTACT.inquiryEmail}
+      data-instagram-handle={INQUIRY_CONTACT.instagramHandle}
+      data-instagram-url={INQUIRY_CONTACT.instagramProfileUrl}
+    >
       <p class="text-xs uppercase tracking-[0.1em] text-muted">Inquiry</p>
-      <h1 class="font-display text-3xl leading-tight md:text-5xl">Message Sent</h1>
-      <p class="font-body text-sm leading-relaxed text-muted md:text-base">
-        Your inquiry was recorded. You can return to the shop, work, or text sections.
-      </p>
+      <h1 class="font-display text-3xl leading-tight md:text-5xl">Review and Send</h1>
+      <div class="space-y-2" aria-live="polite">
+        <p class="text-xs uppercase tracking-[0.08em] text-muted">Inquiry details captured</p>
+        <p class="font-body text-sm leading-relaxed text-muted md:text-base" data-inquiry-summary>
+          We could not find form details. Return to contact and submit your inquiry.
+        </p>
+      </div>
 
       <div class="flex flex-wrap items-center justify-center gap-3 text-xs uppercase tracking-[0.08em]">
         <a
           class="inline-flex items-center border border-fg px-3 py-2 transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
-          href="/shop"
+          data-email-action
+          href="#"
+          hidden
         >
-          Back to Shop
+          Send by Email
+        </a>
+        <a
+          class="inline-flex items-center border border-fg px-3 py-2 transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
+          data-instagram-action
+          href="#"
+          target="_blank"
+          rel="noopener noreferrer"
+          hidden
+        >
+          Send by Instagram
+        </a>
+        <a
+          class="inline-flex items-center border border-hairline px-3 py-2 transition-colors duration-fast ease-standard hover:border-fg"
+          href="/contact"
+        >
+          Edit Inquiry
         </a>
         <a
           class="inline-flex items-center border border-hairline px-3 py-2 transition-colors duration-fast ease-standard hover:border-fg"
@@ -25,6 +55,74 @@ import BaseLayout from '../../layouts/BaseLayout.astro';
           Home
         </a>
       </div>
+
+      {!hasSendChannel && (
+        <p class="text-xs leading-relaxed text-muted" role="alert">
+          Send channels are not configured yet. Set `PUBLIC_INQUIRY_EMAIL` and `PUBLIC_INSTAGRAM_HANDLE` in environment variables.
+        </p>
+      )}
     </section>
   </main>
+
+  <script is:inline data-astro-rerun>
+    (() => {
+      const root = document.querySelector('[data-inquiry-success]');
+      if (!(root instanceof HTMLElement)) {
+        return;
+      }
+
+      const summary = root.querySelector('[data-inquiry-summary]');
+      const emailAction = root.querySelector('[data-email-action]');
+      const instagramAction = root.querySelector('[data-instagram-action]');
+
+      if (!(summary instanceof HTMLElement)) {
+        return;
+      }
+
+      const params = new URLSearchParams(window.location.search);
+      const name = (params.get('name') || '').trim();
+      const replyChannel = (params.get('replyChannel') || '').trim();
+      const replyTo = (params.get('replyTo') || '').trim();
+      const subject = (params.get('subject') || '').trim();
+      const message = (params.get('message') || '').trim();
+
+      if (!name || !replyTo || !subject || !message) {
+        summary.textContent = 'Missing inquiry details. Please return to contact, complete the form, and submit again.';
+        return;
+      }
+
+      const normalizedReplyChannel = replyChannel === 'instagram' ? 'instagram' : 'email';
+      summary.textContent = `Inquiry ready for ${name}. Choose a channel below to send the prefilled message.`;
+
+      const outboundMessage = [
+        `Hi Yehia,`,
+        '',
+        `Name: ${name}`,
+        `Reply channel: ${normalizedReplyChannel}`,
+        `Reply contact: ${replyTo}`,
+        '',
+        `Subject: ${subject}`,
+        '',
+        message,
+      ].join('\n');
+
+      const emailAddress = root.dataset.emailAddress || '';
+      if (emailAddress && emailAction instanceof HTMLAnchorElement) {
+        emailAction.href = `mailto:${emailAddress}?subject=${encodeURIComponent(subject)}&body=${encodeURIComponent(outboundMessage)}`;
+        emailAction.hidden = false;
+      }
+
+      const instagramHandle = (root.dataset.instagramHandle || '').trim();
+      const instagramUrl = (root.dataset.instagramUrl || '').trim();
+      if (instagramAction instanceof HTMLAnchorElement) {
+        if (instagramHandle) {
+          instagramAction.href = `https://ig.me/m/${instagramHandle}?text=${encodeURIComponent(outboundMessage)}`;
+          instagramAction.hidden = false;
+        } else if (instagramUrl) {
+          instagramAction.href = instagramUrl;
+          instagramAction.hidden = false;
+        }
+      }
+    })();
+  </script>
 </BaseLayout>

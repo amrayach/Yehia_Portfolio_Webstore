@@ -2,7 +2,7 @@
 
 ## Routing Principles
 - Keep URL structure explicit and stable.
-- No-scroll pages use frame-based navigation (no vertical scroll).
+- No-scroll pages are reserved for immersive single-frame experiences.
 - Scroll pages use normal document flow and can be long-form.
 - Keep all pages static-renderable by default.
 
@@ -10,8 +10,8 @@
 | Path | Page Intent | Scroll Mode | Render Mode | Content Source | Notes |
 |---|---|---|---|---|---|
 | `/` | Yehia Moldan landing + rotating 3D logo | No-scroll | Static | Local content + assets | Full viewport stage |
-| `/editorial` | Editorial index / chapter chooser | No-scroll | Static | `src/content/editorial` | Frame navigation |
-| `/editorial/[piece]/[chapter]` | Single editorial chapter | No-scroll | Static | `src/content/editorial` | URL-addressable chapter frames |
+| `/editorial` | Editorial index / chapter chooser | Scroll | Static | `src/content/editorial` | Scroll-safe chapter overview |
+| `/editorial/[piece]/[chapter]` | Single editorial chapter | Scroll | Static | `src/content/editorial` | URL-addressable chapters + keyboard/swipe nav |
 | `/shop` | Collection overview (all out-of-stock) | Scroll | Static | `src/content/shop` | Inquiry CTA only |
 | `/shop/[collection]` | Collection detail | Scroll | Static | `src/content/shop` | No checkout widget in MVP |
 | `/text` | Text/article index | Scroll | Static | `src/content/text` | Includes PDF links |
@@ -27,15 +27,9 @@
 ## No-Scroll Behavior (Required)
 - Applies only to:
   - `/`
-  - `/editorial`
-  - `/editorial/[piece]/[chapter]`
-- Content lives inside full-viewport frames.
-- Navigation controls:
-  - Previous / Next buttons
-  - Keyboard arrows (`Left`, `Right`)
-  - Touch swipe on mobile
-- Keep `Esc` mapped to close overlays/lightboxes if present.
-- Update URL when frame/chapter changes for shareability.
+- Content should fit the viewport without vertical scrolling.
+- Keep interactions lightweight so the logo stage stays responsive.
+- Any optional overlays/lightboxes should close on `Esc`.
 
 ## Scroll Behavior (Required)
 - Applies to:
@@ -46,5 +40,5 @@
 ## Navigation Rules
 - Primary nav appears on all pages.
 - Active route indication must remain monochrome.
-- On no-scroll routes, nav must not interfere with frame controls.
+- On no-scroll routes, nav must not block core stage content.
 - Keep top-level nav items stable: `Yehia Moldan`, `Editorial`, `Shop`, `Text`, `Work`, `Contact`.

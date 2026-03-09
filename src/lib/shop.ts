@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { buildInstagramInquiryUrl, buildMailtoUrl } from './site';
 
 export type ShopEntry = CollectionEntry<'shop'>;
 
@@ -18,11 +19,6 @@ export interface ShopItem {
   emailInquiryUrl: string;
 }
 
-export const SHOP_INQUIRY_CONTACT = {
-  instagramHandle: 'your_instagram_handle',
-  inquiryEmail: 'hello@example.com',
-} as const;
-
 const bySortOrder = (a: ShopCollection, b: ShopCollection): number => {
   const sortDelta = a.entry.data.sortOrder - b.entry.data.sortOrder;
   if (sortDelta !== 0) {
@@ -36,15 +32,8 @@ const buildInquiryMessage = (collectionTitle: string, itemTitle: string): string
   return `Hi Yehia, I want to inquire about ${collectionTitle} (${itemTitle}). I understand it is sold out, please share any future availability.`;
 };
 
-const buildInstagramInquiryUrl = (message: string): string => {
-  const encodedMessage = encodeURIComponent(message);
-  return `https://ig.me/m/${SHOP_INQUIRY_CONTACT.instagramHandle}?text=${encodedMessage}`;
-};
-
 const buildEmailInquiryUrl = (subject: string, message: string): string => {
-  const encodedSubject = encodeURIComponent(subject);
-  const encodedBody = encodeURIComponent(message);
-  return `mailto:${SHOP_INQUIRY_CONTACT.inquiryEmail}?subject=${encodedSubject}&body=${encodedBody}`;
+  return buildMailtoUrl(subject, message);
 };
 
 export const getShopCollections = async (): Promise<ShopCollection[]> => {

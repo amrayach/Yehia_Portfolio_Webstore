@@ -1,4 +1,5 @@
 ---
+import Breadcrumb from '../../../components/Breadcrumb.astro';
 import BaseLayout from '../../../layouts/BaseLayout.astro';
 import { getLogoItems, type WorkItem } from '../../../lib/work';
 
@@ -30,10 +31,10 @@ if (!pdfUrl) {
 ---
 
 <BaseLayout title={`${logo.entry.data.title} | Logos`}>
-  <main class="min-h-screen px-4 pb-10 pt-6 md:px-8 md:pb-12 md:pt-8">
+  <main id="main-content" class="min-h-screen px-4 pb-10 pt-6 md:px-8 md:pb-12 md:pt-8">
     <article class="mx-auto w-full max-w-container-lg space-y-6">
       <header class="space-y-3 border-b border-hairline pb-4">
-        <p class="text-xs uppercase tracking-[0.1em] text-muted">Work / Logos</p>
+        <Breadcrumb items={[{ label: 'Work', href: '/work' }, { label: 'Logos', href: '/work/logos' }, { label: logo.entry.data.title }]} />
         <h1 class="font-display text-3xl leading-tight md:text-5xl">{logo.entry.data.title}</h1>
         {logo.entry.data.summary && <p class="font-body text-sm leading-relaxed text-muted md:text-base">{logo.entry.data.summary}</p>}
 
@@ -42,21 +43,85 @@ if (!pdfUrl) {
             class="inline-flex items-center gap-2 border border-fg px-3 py-2 transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
             href={pdfUrl}
             download
+            aria-label={`Download PDF for ${logo.entry.data.title}`}
           >
             Download PDF
-          </a>
-          <a
-            class="inline-flex items-center gap-2 border border-hairline px-3 py-2 transition-colors duration-fast ease-standard hover:border-fg"
-            href="/work/logos"
-          >
-            Back to Logos
           </a>
         </div>
       </header>
 
-      <div class="border border-hairline bg-soft p-2 md:p-3">
-        <iframe title={`${logo.entry.data.title} PDF preview`} src={`${pdfUrl}#toolbar=0`} class="h-[72vh] w-full border-0 bg-bg"></iframe>
+      <div class="relative border border-hairline bg-soft p-2 md:p-3" data-pdf-preview>
+        <div
+          data-pdf-loading
+          class="absolute inset-2 grid place-items-center border border-hairline bg-bg text-xs uppercase tracking-[0.08em] text-muted md:inset-3"
+        >
+          Loading PDF...
+        </div>
+        <iframe
+          data-pdf-frame
+          title={`${logo.entry.data.title} PDF preview`}
+          src={`${pdfUrl}#toolbar=0`}
+          class="min-h-[50vh] w-full border-0 bg-bg md:min-h-[72vh]"
+        ></iframe>
+        <p data-pdf-error class="hidden p-3 text-xs uppercase tracking-[0.08em] text-muted">
+          PDF could not be loaded.
+          <a href={pdfUrl} download class="ml-2 underline underline-offset-4">
+            Download directly
+          </a>
+        </p>
       </div>
     </article>
   </main>
+
+  <script is:inline data-astro-rerun>
+    (() => {
+      const root = document.querySelector('[data-pdf-preview]');
+      if (!(root instanceof HTMLElement)) {
+        return;
+      }
+
+      const frame = root.querySelector('[data-pdf-frame]');
+      const loading = root.querySelector('[data-pdf-loading]');
+      const error = root.querySelector('[data-pdf-error]');
+
+      if (!(frame instanceof HTMLIFrameElement) || !(loading instanceof HTMLElement) || !(error instanceof HTMLElement)) {
+        return;
+      }
+
+      let settled = false;
+      const hideLoading = () => {
+        loading.classList.add('hidden');
+      };
+
+      const showError = () => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        hideLoading();
+        error.classList.remove('hidden');
+      };
+
+      const handleLoad = () => {
+        if (settled) {
+          return;
+        }
+        settled = true;
+        hideLoading();
+      };
+
+      const timeoutId = window.setTimeout(showError, 12000);
+      frame.addEventListener('load', handleLoad);
+      frame.addEventListener('error', showError);
+
+      const cleanup = () => {
+        window.clearTimeout(timeoutId);
+        frame.removeEventListener('load', handleLoad);
+        frame.removeEventListener('error', showError);
+        document.removeEventListener('astro:before-swap', cleanup);
+      };
+
+      document.addEventListener('astro:before-swap', cleanup);
+    })();
+  </script>
 </BaseLayout>

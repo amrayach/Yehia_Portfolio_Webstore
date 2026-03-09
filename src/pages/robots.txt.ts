@@ -3,8 +3,11 @@ import type { APIRoute } from 'astro';
 export const prerender = true;
 
 export const GET: APIRoute = ({ site }) => {
-  const baseSite = site ?? new URL('https://example.com');
-  const sitemapUrl = new URL('/sitemap.xml', baseSite).toString();
+  if (!site) {
+    return new Response('Site URL is not configured. Set `site` in astro.config.mjs.', { status: 500 });
+  }
+
+  const sitemapUrl = new URL('/sitemap.xml', site).toString();
   const body = `User-agent: *\nAllow: /\n\nSitemap: ${sitemapUrl}\n`;
 
   return new Response(body, {

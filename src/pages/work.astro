@@ -29,7 +29,7 @@ const categories = [
 ---
 
 <BaseLayout title="Work | Yehia Moldan">
-  <main class="min-h-screen px-4 pb-10 pt-6 md:px-8 md:pb-12 md:pt-8">
+  <main id="main-content" class="min-h-screen px-4 pb-10 pt-6 md:px-8 md:pb-12 md:pt-8">
     <section class="mx-auto w-full max-w-container-lg space-y-6">
       <header class="space-y-2 border-b border-hairline pb-4">
         <p class="text-xs uppercase tracking-[0.1em] text-muted">Work</p>
@@ -39,7 +39,7 @@ const categories = [
       <div class="grid gap-px border border-hairline bg-hairline md:grid-cols-3">
         {
           categories.map((category) => (
-            <article class="flex h-full flex-col justify-between bg-bg p-5 md:p-6">
+            <article class="card-hover flex h-full flex-col justify-between border border-transparent bg-bg p-5 md:p-6">
               <div class="space-y-3">
                 <p class="text-xs uppercase tracking-[0.08em] text-muted">{category.count} items</p>
                 <h2 class="font-display text-2xl leading-tight md:text-3xl">{category.label}</h2>
@@ -50,6 +50,7 @@ const categories = [
                 <a
                   class="inline-flex items-center gap-2 border border-fg px-3 py-2 text-xs uppercase tracking-[0.08em] transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
                   href={category.href}
+                  aria-label={`Open ${category.label} category`}
                 >
                   Open Category
                 </a>

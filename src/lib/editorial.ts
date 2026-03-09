@@ -1,4 +1,5 @@
 import { getCollection, type CollectionEntry } from 'astro:content';
+import { estimateReadingMinutes } from './reading';
 
 export type EditorialEntry = CollectionEntry<'editorial'>;
 
@@ -7,6 +8,7 @@ export interface EditorialChapter {
   piece: string;
   chapter: string;
   url: string;
+  readingMinutes: number;
 }
 
 export interface EditorialPiece {
@@ -14,6 +16,8 @@ export interface EditorialPiece {
   title: string;
   summary: string;
   chapters: EditorialChapter[];
+  totalReadingMinutes: number;
+  latestPublishDate?: Date;
 }
 
 const toSortKey = (chapter: EditorialChapter): number => chapter.entry.data.chapterNumber;
@@ -49,6 +53,7 @@ export const getEditorialChapters = async (): Promise<EditorialChapter[]> => {
         piece,
         chapter,
         url: `/editorial/${piece}/${chapter}`,
+        readingMinutes: estimateReadingMinutes(entry.body ?? ''),
       };
     })
     .sort((a, b) => {
@@ -78,6 +83,8 @@ export const getEditorialPieces = async (): Promise<EditorialPiece[]> => {
       title: chapter.entry.data.pieceTitle,
       summary: chapter.entry.data.pieceSummary,
       chapters: [chapter],
+      totalReadingMinutes: chapter.readingMinutes,
+      latestPublishDate: chapter.entry.data.publishDate,
     });
   }
 
@@ -85,6 +92,19 @@ export const getEditorialPieces = async (): Promise<EditorialPiece[]> => {
     .map((piece) => ({
       ...piece,
       chapters: [...piece.chapters].sort(byChapterOrder),
+      totalReadingMinutes: piece.chapters.reduce((sum, chapter) => sum + chapter.readingMinutes, 0),
+      latestPublishDate: piece.chapters.reduce<Date | undefined>((latest, chapter) => {
+        const date = chapter.entry.data.publishDate;
+        if (!date) {
+          return latest;
+        }
+
+        if (!latest || date.getTime() > latest.getTime()) {
+          return date;
+        }
+
+        return latest;
+      }, undefined),
     }))
     .sort((a, b) => a.piece.localeCompare(b.piece));
 };

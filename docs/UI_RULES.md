@@ -76,7 +76,7 @@
 ## Navigation Rules
 - Persistent top navigation on all routes.
 - Keep nav minimal: no dropdown mega-menus in MVP.
-- On no-scroll pages, show frame controls without obscuring content.
+- On no-scroll pages, keep controls unobtrusive and avoid covering the core stage.
 - Active item uses contrast/weight changes only.
 - Mobile nav should be simple and fast (sheet or full-screen minimal menu).
 

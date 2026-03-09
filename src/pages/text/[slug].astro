@@ -1,5 +1,7 @@
 ---
 import { render } from 'astro:content';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import ReadingProgress from '../../components/ReadingProgress.astro';
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import { getTextArticles, type TextArticle } from '../../lib/text';
 
@@ -24,7 +26,7 @@ interface Props {
 
 const { article } = Astro.props as Props;
 const { Content } = await render(article.entry);
-const pdfUrl = article.entry.data.pdfUrl ?? '/pdfs/text-placeholder.pdf';
+const pdfUrl = article.entry.data.pdfUrl ?? null;
 const publishDate = article.entry.data.publishDate?.toLocaleDateString('en-US', {
   year: 'numeric',
   month: 'long',
@@ -33,28 +35,27 @@ const publishDate = article.entry.data.publishDate?.toLocaleDateString('en-US', 
 ---
 
 <BaseLayout title={`${article.entry.data.title} | Text`}>
-  <main class="min-h-screen px-4 pb-12 pt-6 md:px-8 md:pt-8">
+  <ReadingProgress />
+  <main id="main-content" class="min-h-screen px-4 pb-12 pt-6 md:px-8 md:pt-8">
     <article class="mx-auto w-full max-w-[72ch]">
       <header class="space-y-4 border-b border-hairline pb-6">
-        <p class="text-xs uppercase tracking-[0.1em] text-muted">Text</p>
+        <Breadcrumb items={[{ label: 'Text', href: '/text' }, { label: article.entry.data.title }]} />
         <h1 class="font-display text-3xl leading-tight md:text-5xl">{article.entry.data.title}</h1>
         <p class="font-body text-base leading-relaxed text-muted">{article.entry.data.excerpt}</p>
 
         <div class="flex flex-wrap items-center gap-3 text-xs uppercase tracking-[0.08em] text-muted">
+          <span>~{article.readingMinutes} min read</span>
           {publishDate && <span>{publishDate}</span>}
-          <a
-            class="inline-flex items-center gap-2 border border-fg px-3 py-2 text-fg transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
-            href={pdfUrl}
-            download
-          >
-            Download PDF
-          </a>
-          <a
-            class="inline-flex items-center gap-2 border border-hairline px-3 py-2 text-fg transition-colors duration-fast ease-standard hover:border-fg"
-            href="/text"
-          >
-            Back to Text
-          </a>
+          {pdfUrl && (
+            <a
+              class="inline-flex items-center gap-2 border border-fg px-3 py-2 text-fg transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
+              href={pdfUrl}
+              download
+              aria-label={`Download PDF for ${article.entry.data.title}`}
+            >
+              Download PDF
+            </a>
+          )}
         </div>
       </header>
 

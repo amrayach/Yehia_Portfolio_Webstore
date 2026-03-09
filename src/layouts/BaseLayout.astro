@@ -1,4 +1,5 @@
 ---
+import { ClientRouter } from 'astro:transitions';
 import '../styles/global.css';
 
 interface Props {
@@ -30,9 +31,9 @@ const {
 } = Astro.props;
 
 const pageTitle = title === SITE_NAME || title.endsWith(`| ${SITE_NAME}`) ? title : `${title} | ${SITE_NAME}`;
-const site = Astro.site ?? new URL('https://example.com');
-const canonicalUrl = new URL(Astro.url.pathname, site).toString();
-const ogImageUrl = new URL(ogImage, site).toString();
+const site = Astro.site;
+const canonicalUrl = site ? new URL(Astro.url.pathname, site).toString() : Astro.url.toString();
+const ogImageUrl = site ? new URL(ogImage, site).toString() : ogImage;
 const robotsContent = noIndex ? 'noindex, nofollow' : 'index, follow';
 const pathname = Astro.url.pathname.replace(/\/+$/, '') || '/';
 const isRouteActive = (href: string): boolean => {
@@ -51,6 +52,16 @@ const isRouteActive = (href: string): boolean => {
     <meta name="viewport" content="width=device-width" />
     <meta name="description" content={description} />
     <meta name="robots" content={robotsContent} />
+    <ClientRouter />
+    <script is:inline>
+      (() => {
+        try {
+          if (localStorage.getItem('ym_theme_mode') === 'inverse') {
+            document.documentElement.setAttribute('data-theme', 'inverse');
+          }
+        } catch {}
+      })();
+    </script>
     <link rel="canonical" href={canonicalUrl} />
 
     <meta property="og:type" content="website" />
@@ -68,6 +79,12 @@ const isRouteActive = (href: string): boolean => {
     <title>{pageTitle}</title>
   </head>
   <body class:list={['bg-bg text-fg antialiased', noScroll && 'h-screen overflow-hidden']}>
+    <a
+      href="#main-content"
+      class="skip-link fixed left-3 top-3 z-[70] -translate-y-[200%] border border-fg bg-bg px-3 py-2 text-xs uppercase tracking-[0.08em] transition-transform duration-fast ease-standard focus:translate-y-0 focus-visible:translate-y-0"
+    >
+      Skip to content
+    </a>
     <header class="fixed inset-x-0 top-0 z-50 pointer-events-none">
       <div class="mx-auto w-full max-w-container-lg px-3 pt-3 md:px-6 md:pt-4">
         <nav
@@ -77,6 +94,7 @@ const isRouteActive = (href: string): boolean => {
           {NAV_ITEMS.map((item) => (
             <a
               href={item.href}
+              data-astro-prefetch
               class:list={[
                 'shrink-0 border px-2 py-1 text-[0.65rem] uppercase tracking-[0.08em] transition-colors duration-fast ease-standard',
                 isRouteActive(item.href)
@@ -88,9 +106,85 @@ const isRouteActive = (href: string): boolean => {
               {item.label}
             </a>
           ))}
+          <button
+            type="button"
+            data-theme-toggle
+            class="theme-toggle ml-auto shrink-0 border px-2 py-1 text-[0.65rem] uppercase tracking-[0.08em] transition-colors duration-fast ease-standard"
+            aria-label="Toggle black/white theme"
+            aria-pressed="false"
+            data-active="false"
+          >
+            Black / White
+          </button>
         </nav>
       </div>
     </header>
-    <slot />
+    <div transition:animate="fade">
+      <slot />
+    </div>
+    <script is:inline>
+      (() => {
+        const storageKey = 'ym_theme_mode';
+        const inverseMode = 'inverse';
+        const defaultMode = 'default';
+        const root = document.documentElement;
+        let mode = defaultMode;
+
+        const applyMode = (toggle, modeValue) => {
+          if (!(toggle instanceof HTMLButtonElement)) {
+            return;
+          }
+
+          const isInverse = modeValue === inverseMode;
+          mode = isInverse ? inverseMode : defaultMode;
+
+          if (isInverse) {
+            root.setAttribute('data-theme', inverseMode);
+          } else {
+            root.removeAttribute('data-theme');
+          }
+
+          toggle.dataset.active = isInverse ? 'true' : 'false';
+          toggle.setAttribute('aria-pressed', isInverse ? 'true' : 'false');
+        };
+
+        const getStoredMode = () => {
+          try {
+            return localStorage.getItem(storageKey) === inverseMode ? inverseMode : defaultMode;
+          } catch {
+            return root.getAttribute('data-theme') === inverseMode ? inverseMode : defaultMode;
+          }
+        };
+
+        const setupThemeToggle = () => {
+          const toggle = document.querySelector('[data-theme-toggle]');
+          if (!(toggle instanceof HTMLButtonElement)) {
+            return;
+          }
+
+          applyMode(toggle, getStoredMode());
+
+          if (toggle.dataset.bound === 'true') {
+            return;
+          }
+
+          toggle.dataset.bound = 'true';
+          toggle.addEventListener('click', () => {
+            const nextMode = mode === inverseMode ? defaultMode : inverseMode;
+            applyMode(toggle, nextMode);
+
+            try {
+              localStorage.setItem(storageKey, mode);
+            } catch {}
+          });
+        };
+
+        setupThemeToggle();
+
+        document.addEventListener('astro:page-load', () => {
+          setupThemeToggle();
+        });
+      })();
+    </script>
   </body>
 </html>

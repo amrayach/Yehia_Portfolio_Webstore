@@ -239,6 +239,42 @@
 
 # Task: Fix blocked site navigation (global primary nav)
 
+---
+
+# Task: Apply full website improvement pass (SEO, inquiry, a11y, performance, guardrails)
+
+## Plan
+- [x] Replace placeholder contact/inquiry values with environment-driven configuration and safe fallbacks.
+- [x] Enforce non-placeholder production site URL behavior for canonical/robots/sitemap safety.
+- [x] Implement a real inquiry form flow from `/contact` to `/inquiry/success` with validation and clear messaging.
+- [x] Remove hardcoded text listing limits and placeholder-PDF coupling from text routes.
+- [x] Add accessibility essentials: skip link, visible focus states, safer external-link attributes.
+- [x] Make editorial routes scroll-safe for longer content while preserving navigation.
+- [x] Optimize homepage 3D loading strategy via deferred/lazy module loading.
+- [x] Add engineering guardrails (lint/test scripts + CI workflow + docs updates).
+- [x] Run verification (`pnpm lint`, `pnpm test`, `pnpm build`) and document review results.
+
+## Progress Notes
+- Added `src/lib/site.ts` and `.env.example` to remove hardcoded inquiry placeholders and centralize contact channel behavior.
+- Updated shop inquiry URL generation to use configured channels with contact-form fallback when a channel is unavailable.
+- Replaced `/contact` placeholder flow with a validated inquiry form and query-prefill support from shop links.
+- Reworked `/inquiry/success` into a real review/send step that validates submitted fields and generates prefilled email/Instagram actions.
+- Removed hardcoded text listing limits and removed placeholder PDF coupling from text pages and article content.
+- Added global accessibility basics: skip link, visible focus styles, and secure external link attributes.
+- Changed editorial index/detail routes to scroll-safe layouts for longer chapter content.
+- Deferred homepage 3D initialization with IntersectionObserver + requestIdleCallback and dynamic module imports.
+- Added `lint`, `test`, and `verify` scripts, plus GitHub Actions CI workflow at `.github/workflows/ci.yml`.
+- Updated docs (`README.md`, `docs/DEV_PLAYBOOK.md`, `docs/ROUTES.md`, `docs/UI_RULES.md`) to reflect new env vars and route behavior.
+
+## Verification
+- [x] `pnpm lint`
+- [x] `pnpm test`
+- [x] `pnpm build`
+
+## Review
+- All planned improvements were applied and verified in a passing local pipeline.
+- Remaining non-blocking warning: Cloudflare adapter still reports optional image optimization guidance (`imageService: "compile"`).
+
 ## Plan
 - [x] Add a persistent top navigation in the shared layout for top-level routes.
 - [x] Implement active-route styling so users can see their current location.
@@ -261,3 +297,97 @@
 - Navigation is now available on all pages through a persistent top bar, resolving the blocked user flow.
 - Contact and inquiry success routes are now present and prerendered in static output.
 - Type/check/build pipelines remain green after the navigation fix.
+
+---
+
+# Task: Add global black/white inversion toggle
+
+## Plan
+- [x] Add inverse theme token overrides controlled by a root `data-theme` attribute.
+- [x] Add a `Black / White` toggle button in the shared top navigation.
+- [x] Implement `localStorage` persistence with pre-paint theme application.
+- [x] Ensure toggle state updates button accessibility (`aria-pressed`) and visual state.
+- [x] Run `pnpm check` and `pnpm build` to verify no regressions.
+
+## Progress Notes
+- Added `html[data-theme='inverse']` color token overrides in `src/styles/tokens.css` so all token-driven UI surfaces invert globally.
+- Added a compact `Black / White` button to the right side of the fixed primary nav in `src/layouts/BaseLayout.astro`.
+- Added pre-paint theme restore script in `<head>` using `localStorage` key `ym_theme_mode` to avoid initial flicker.
+- Added runtime toggle script that flips `data-theme`, persists mode, and updates `aria-pressed`.
+- Added `.theme-toggle` active/inactive styles in `src/styles/global.css` for consistent monochrome feedback.
+
+## Verification
+- [x] `pnpm check`
+- [x] `pnpm build`
+
+## Review
+- Site-wide black/white inversion now works through token swapping with persistent user preference.
+- Toggle is available across all routes from the shared nav and keeps state after navigation/reload.
+- Type/build checks passed with no regressions.
+
+---
+
+# Task: Implement UI/UX Enhancement Plan (Astro 5.18 corrected)
+
+## Plan
+- [x] Phase 1: foundation updates (`ClientRouter`, transitions, prefetch policy, hover utilities, CTA a11y labels, typography loading).
+- [x] Phase 2: shared components (`Breadcrumb`, `Lightbox`, `ReadingProgress`) and transition-safe script lifecycle handling.
+- [x] Phase 3: page-level enhancements across Home, Shop, Editorial, Text, Work, Contact, Inquiry Success, and 404.
+- [x] Phase 4: image/PDF/a11y/performance hardening and docs/task updates.
+- [x] Run verification (`pnpm lint`, `pnpm test`, `pnpm build`) and capture review notes.
+
+## Progress Notes
+- Replaced incorrect transition setup with Astro 5.18-compatible `ClientRouter` in `BaseLayout` and added route-level fade animation.
+- Added explicit prefetch policy in `astro.config.mjs` and opt-in prefetch attributes on primary nav links.
+- Downloaded and self-hosted Syne + Instrument Sans (`woff2`, latin subset) in `public/fonts/`, then switched to local `@font-face` declarations in `src/styles/global.css`.
+- Added reusable global polish utilities in `global.css`: card hover lift, image hover zoom, field focus transitions, and shared fade-in animation utility.
+- Added reusable components:
+  - `src/components/Breadcrumb.astro`
+  - `src/components/Lightbox.astro` (`<dialog>` modal with keyboard navigation and focus return)
+  - `src/components/ReadingProgress.astro` (top fixed progress indicator, `prefers-reduced-motion` aware)
+- Added `src/lib/reading.ts` and extended `src/lib/editorial.ts`/`src/lib/text.ts` with reading-time metadata for consistent display.
+- Replaced ad-hoc back links with breadcrumbs on detail routes (`shop/[collection]`, `editorial/[piece]/[chapter]`, `text/[slug]`, `work/tattoos`, `work/jewellery`, `work/logos/index`, `work/logos/[slug]`).
+- Enhanced page-level UX:
+  - Home: staged fade-in text and GLB loading shimmer/skeleton.
+  - Shop/Work/Text/Editorial lists: hover states, richer metadata, and contextual CTA `aria-label`s.
+  - Work galleries: lightbox integration for tattoos/jewellery image viewing.
+  - Text + Editorial detail pages: reading progress and reading-time metadata.
+  - Contact: required indicators, live character counter, custom Constraint Validation API messaging, and `data-astro-reload` form reliability mode.
+  - Inquiry success: polite live summary container and alert semantics for missing send channels.
+  - Logos PDF detail: loading overlay, timeout/error fallback message, responsive iframe sizing.
+  - 404: sitemap-style section links and subtle heading entrance animation.
+- Hardened script lifecycle for client routing by adding `data-astro-rerun` where needed and cleanup handlers on `astro:before-swap`.
+- Updated `docs/DEV_PLAYBOOK.md` with explicit image handling policy for current SVG assets vs future raster assets.
+- Added a lessons entry in `tasks/lessons.md` for transition API verification and client-router script lifecycle planning.
+
+## Verification
+- [x] `pnpm lint`
+- [x] `pnpm test`
+- [x] `pnpm build`
+
+## Review
+- All planned UX enhancements were implemented and the full verification pipeline passed.
+- `pnpm verify` succeeded end-to-end with zero diagnostics errors/warnings in `astro check`.
+- Remaining non-blocking warning remains unchanged from baseline: Cloudflare adapter note about optional `imageService: "compile"` optimization.
+
+---
+
+# Task: Commit and push current repository changes
+
+## Plan
+- [x] Inspect repo status, remotes, and verification scripts to confirm scope.
+- [x] Run the repository verification pipeline and review failures if any appear.
+- [ ] Create a single commit for the current tracked and untracked changes.
+- [ ] Push the current branch to `origin` and record the outcome.
+
+## Progress Notes
+- Verified the branch is `main`, reviewed the current diff footprint, and confirmed `origin` is configured.
+- Ran `pnpm verify`; `astro check` passed in both lint/test phases and the Astro build completed successfully.
+
+## Verification
+- [x] `pnpm verify`
+- [x] `git status --short --branch`
+- [ ] `git push origin main`
+
+## Review
+- The repository is verified and ready for a single commit/push covering the current UX, content, config, and workflow changes.

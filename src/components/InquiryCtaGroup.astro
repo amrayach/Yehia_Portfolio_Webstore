@@ -2,24 +2,31 @@
 interface Props {
   instagramUrl: string;
   emailUrl: string;
+  contextLabel?: string;
 }
 
-const { instagramUrl, emailUrl } = Astro.props;
+const { instagramUrl, emailUrl, contextLabel = 'this item' } = Astro.props;
+const isExternalUrl = (url: string): boolean => /^https?:\/\//.test(url);
+const isContactRoute = (url: string): boolean => url.startsWith('/contact');
+const primaryLabel = isContactRoute(instagramUrl) ? 'Use Inquiry Form' : 'DM to Inquire';
+const secondaryLabel = isContactRoute(emailUrl) ? 'Inquiry Form Fallback' : 'Email Fallback';
 ---
 
 <div class="flex flex-wrap items-center gap-2 pt-4">
   <a
     class="inline-flex items-center border border-fg bg-fg px-3 py-2 text-xs font-medium uppercase tracking-[0.08em] text-bg transition-colors duration-fast ease-standard hover:bg-bg hover:text-fg"
     href={instagramUrl}
-    target="_blank"
-    rel="noreferrer"
+    target={isExternalUrl(instagramUrl) ? '_blank' : undefined}
+    rel={isExternalUrl(instagramUrl) ? 'noopener noreferrer' : undefined}
+    aria-label={`${primaryLabel} for ${contextLabel}`}
   >
-    DM to inquire
+    {primaryLabel}
   </a>
   <a
     class="inline-flex items-center border border-hairline px-3 py-2 text-xs font-medium uppercase tracking-[0.08em] text-fg transition-colors duration-fast ease-standard hover:border-fg"
     href={emailUrl}
+    aria-label={`${secondaryLabel} for ${contextLabel}`}
   >
-    Email fallback
+    {secondaryLabel}
   </a>
 </div>

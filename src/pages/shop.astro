@@ -6,7 +6,7 @@ const collections = await getShopCollections();
 ---
 
 <BaseLayout title="Shop | Yehia Moldan" description="Collection overview. Inquiry-only, sold out by design.">
-  <main class="min-h-screen px-4 pb-12 pt-6 md:px-8 md:pt-8">
+  <main id="main-content" class="min-h-screen px-4 pb-12 pt-6 md:px-8 md:pt-8">
     <section class="mx-auto w-full max-w-container-lg space-y-6">
       <header class="space-y-3 border-b border-hairline pb-4">
         <p class="text-xs uppercase tracking-[0.1em] text-muted">Shop</p>
@@ -21,32 +21,43 @@ const collections = await getShopCollections();
           <article class="border border-hairline bg-bg p-6 text-sm text-muted md:text-base">No shop collections published.</article>
         ) : (
           <div class="grid gap-px border border-hairline bg-hairline md:grid-cols-2">
-            {collections.map((collection) => (
-              <article class="flex h-full flex-col justify-between bg-bg p-5 md:p-6">
-                <div class="space-y-4">
-                  <img
-                    src={collection.entry.data.heroImage}
-                    alt={collection.entry.data.title}
-                    loading="lazy"
-                    class="aspect-[4/3] w-full border border-hairline object-cover"
-                  />
-                  <div class="space-y-2">
-                    <p class="text-xs uppercase tracking-[0.08em] text-muted">{collection.entry.data.status.replaceAll('_', ' ')}</p>
-                    <h2 class="font-display text-2xl leading-tight md:text-3xl">{collection.entry.data.title}</h2>
-                    <p class="font-body text-sm leading-relaxed text-muted md:text-base">{collection.entry.data.description}</p>
-                  </div>
-                </div>
+            {collections.map((collection) => {
+              const itemCount = collection.entry.data.gallery?.length ?? 1;
 
-                <div class="mt-8 border-t border-hairline pt-4">
-                  <a
-                    class="inline-flex items-center border border-fg px-3 py-2 text-xs uppercase tracking-[0.08em] transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
-                    href={collection.url}
-                  >
-                    View Items
-                  </a>
-                </div>
-              </article>
-            ))}
+              return (
+                <article class="card-hover flex h-full flex-col justify-between border border-transparent bg-bg p-5 md:p-6">
+                  <div class="space-y-4">
+                    <div class="img-hover border border-hairline">
+                      <img
+                        src={collection.entry.data.heroImage}
+                        alt={collection.entry.data.title}
+                        loading="lazy"
+                        decoding="async"
+                        width="1200"
+                        height="900"
+                        class="aspect-[4/3] w-full object-cover"
+                      />
+                    </div>
+                    <div class="space-y-2">
+                      <p class="text-xs uppercase tracking-[0.08em] text-muted">{collection.entry.data.status.replaceAll('_', ' ')}</p>
+                      <h2 class="font-display text-2xl leading-tight md:text-3xl">{collection.entry.data.title}</h2>
+                      <p class="font-body text-sm leading-relaxed text-muted md:text-base">{collection.entry.data.description}</p>
+                    </div>
+                  </div>
+
+                  <div class="mt-8 flex items-center justify-between border-t border-hairline pt-4">
+                    <span class="text-xs uppercase tracking-[0.08em] text-muted">{itemCount} items</span>
+                    <a
+                      class="inline-flex items-center border border-fg px-3 py-2 text-xs uppercase tracking-[0.08em] transition-colors duration-fast ease-standard hover:bg-fg hover:text-bg"
+                      href={collection.url}
+                      aria-label={`View ${collection.entry.data.title} collection items`}
+                    >
+                      View Items
+                    </a>
+                  </div>
+                </article>
+              );
+            })}
           </div>
         )
       }
